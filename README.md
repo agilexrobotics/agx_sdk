@@ -3,7 +3,7 @@
 ![GitHub Workflow Status](https://github.com/westonrobot/wrp_sdk/workflows/Cpp/badge.svg)
 ![GitHub Workflow Status](https://github.com/westonrobot/wrp_sdk/workflows/ROS/badge.svg)
 
-Copyright (c) 2020 [WestonRobot](https://www.westonrobot.com/)
+Copyright (c) 2020 [AgilexRobot](https://www.agilex.ai/)
 
 ## Introduction
 
@@ -72,7 +72,7 @@ $ sudo apt install libasio-dev
 
 ```
 $ cd <your-catkin-ws>/src
-$ git clone https://github.com/westonrobot/wrp_sdk.git
+$ git clone https://github.com/agilexrobotics/agx_sdk.git
 $ cd ..
 $ catkin_make
 ```
@@ -88,7 +88,7 @@ $ sudo apt install libncurses5-dev
 Configure and build
 
 ```
-$ cd wrp_sdk 
+$ cd agx_sdk 
 $ mkdir build
 $ cd build
 $ cmake ..
