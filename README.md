@@ -1,4 +1,4 @@
-# Weston Robot Platform SDK
+# Agilex Robot Platform SDK
 
 ![GitHub Workflow Status](https://github.com/westonrobot/wrp_sdk/workflows/Cpp/badge.svg)
 ![GitHub Workflow Status](https://github.com/westonrobot/wrp_sdk/workflows/ROS/badge.svg)
@@ -11,6 +11,7 @@ Supported platforms
 
 * **Scout**: skid-steer mobile base
 * **Hunter**: ackermann mobile base
+* **Bunker**: caterpillar mobile base
 
 This software packages provides a C++ interface to communicate with the mobile platforms from Weston Robot, for sending commands to the robot and acquiring the latest robot state. The SDK works on both x86 and ARM platforms.
 
