@@ -1,0 +1,1 @@
+/usr/bin/c++  -O3 -DNDEBUG   CMakeFiles/app_scout_demo.dir/scout_demo/scout_demo.cpp.o  -o ../bin/app_scout_demo ../lib/libwrp_sdk.a -lpthread 

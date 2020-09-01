@@ -1,0 +1,1 @@
+/usr/bin/c++  -O3 -DNDEBUG   CMakeFiles/app_scout_monitor.dir/app_scout_monitor.cpp.o  -o ../../../bin/app_scout_monitor ../../../lib/libmonitor.a ../../../lib/libwrp_sdk.a -lpthread -lncurses /usr/lib/x86_64-linux-gnu/libform.so 

@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../../lib/libmonitor.a  CMakeFiles/monitor.dir/src/nshapes.cpp.o CMakeFiles/monitor.dir/src/ncolors.cpp.o CMakeFiles/monitor.dir/src/scout_monitor.cpp.o
+/usr/bin/ranlib ../../lib/libmonitor.a
