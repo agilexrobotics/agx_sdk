@@ -3,7 +3,7 @@
 ![GitHub Workflow Status](https://github.com/westonrobot/wrp_sdk/workflows/Cpp/badge.svg)
 ![GitHub Workflow Status](https://github.com/westonrobot/wrp_sdk/workflows/ROS/badge.svg)
 
-Copyright (c) 2020 [AgilexRobot](https://www.agilex.ai/)
+Copyright (c) 2020 [AgilexRobot](http://www.agilex.ai/)
 
 ## Introduction
 
