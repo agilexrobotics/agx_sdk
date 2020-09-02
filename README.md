@@ -12,8 +12,8 @@ Supported platforms
 * **Scout**: skid-steer mobile base
 * **Hunter**: ackermann mobile base
 * **Bunker**: caterpillar mobile base
-* **Tracer**: caterpillar mobile base
-* **Scout-mini**: caterpillar mobile base
+* **Tracer**: skid-steer mobile base
+* **Scout-mini**: skid-steer mobile base
 
 This software packages provides a C++ interface to communicate with the mobile platforms from Agilex Robot, for sending commands to the robot and acquiring the latest robot state. The SDK works on both x86 and ARM platforms.
 
