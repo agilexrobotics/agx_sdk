@@ -96,7 +96,7 @@ $ make
 ```
 
 ## Run Demo Apps
-###Run Scout Demo###
+### Run Scout Demo
 
 The demo code expects one parameter for the CAN bus mode.
 
@@ -121,7 +121,7 @@ or
 ```
 $./app_scout_monitor /dev/ttyUSB0 115200
 ```
-###Run Hunter Demo###
+### Run Hunter Demo###
 The demo code expects one parameter for the CAN bus mode.
 
 ```
