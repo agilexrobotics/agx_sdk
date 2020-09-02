@@ -96,6 +96,7 @@ $ make
 ```
 
 ## Run Demo Apps
+###Run Scout Demo###
 
 The demo code expects one parameter for the CAN bus mode.
 
@@ -120,6 +121,15 @@ or
 ```
 $./app_scout_monitor /dev/ttyUSB0 115200
 ```
+###Run Hunter Demo###
+The demo code expects one parameter for the CAN bus mode.
+
+```
+$ ./app_hunter_demo can0
+```
+
+Both the port name and baud rate need to be provided when using the RS232 interface.
+
 
 Note: the monitor app is not built by default if you use this SDK with ROS.
 
