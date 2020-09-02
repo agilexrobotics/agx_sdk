@@ -12,8 +12,10 @@ Supported platforms
 * **Scout**: skid-steer mobile base
 * **Hunter**: ackermann mobile base
 * **Bunker**: caterpillar mobile base
+* **Tracer**: caterpillar mobile base
+* **Scout-mini**: caterpillar mobile base
 
-This software packages provides a C++ interface to communicate with the mobile platforms from Weston Robot, for sending commands to the robot and acquiring the latest robot state. The SDK works on both x86 and ARM platforms.
+This software packages provides a C++ interface to communicate with the mobile platforms from Agilex Robot, for sending commands to the robot and acquiring the latest robot state. The SDK works on both x86 and ARM platforms.
 
 Generally, you only need to instantiate an object of the robot base class (such as ScoutBase), then use the object to programmatically control the robot. Internally, the base class manages two background threads, one to process CAN/UART messages of the robot state and accordingly update state variables in the robot state data structure, and the other to maintain a 50Hz loop and send the latest command to the robot base. User can iteratively perform tasks in the main thread and check the robot state or set control commands. 
 
