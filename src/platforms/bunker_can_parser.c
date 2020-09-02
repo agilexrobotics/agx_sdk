@@ -58,23 +58,6 @@ bool DecodeBunkerMsgFromCAN(const struct can_frame *rx_frame, BunkerMessage *msg
         memcpy(msg->body.motor_driver_status_msg.data.raw, rx_frame->data, rx_frame->can_dlc * sizeof(uint8_t));
         break;
     }
-//    case CAN_MSG_MOTOR3_DRIVER_STATUS_ID:
-//    {
-//        msg->type = BunkerMotorDriverStatusMsg;
-//        // msg->motor_driver_status_msg.id = CAN_MSG_MOTOR3_DRIVER_STATUS_ID;
-//        msg->body.motor_driver_status_msg.motor_id = BUNKER_MOTOR3_ID;
-//        memcpy(msg->body.motor_driver_status_msg.data.raw, rx_frame->data, rx_frame->can_dlc * sizeof(uint8_t));
-//        break;
-//    }
-//    case CAN_MSG_MOTOR4_DRIVER_STATUS_ID:
-//    {
-//        msg->type = BunkerMotorDriverStatusMsg;
-//        // msg->motor_driver_status_msg.id = CAN_MSG_MOTOR4_DRIVER_STATUS_ID;
-//        msg->body.motor_driver_status_msg.motor_id = BUNKER_MOTOR4_ID;
-//        memcpy(msg->body.motor_driver_status_msg.data.raw, rx_frame->data, rx_frame->can_dlc * sizeof(uint8_t));
-//        break;
-//    }
-    // in the current implementation, both MsgType and can_frame include 8 * uint8_t
     case CAN_MSG_MOTION_CONTROL_CMD_ID:
     {
         msg->type = BunkerMotionControlMsg;

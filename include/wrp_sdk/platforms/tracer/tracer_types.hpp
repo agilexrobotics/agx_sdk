@@ -42,7 +42,6 @@ struct TracerState
     // light state
     bool light_control_enabled = false;
     LightState front_light_state;
-    //LightState rear_light_state;
 
     // motion state
     double linear_velocity = 0;

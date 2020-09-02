@@ -12,7 +12,7 @@
 #include "string.h"
 
 static void EncodeTracerMotionControlMsgToCAN(const MotionCmdMessage *msg, struct can_frame *tx_frame);
-void EncodeTracerModeControlMsgToCAN(const MotionCmdMessage *msg, struct can_frame *tx_frame);
+static void EncodeTracerModeControlMsgToCAN(const MotionCmdMessage *msg, struct can_frame *tx_frame);
 
 bool DecodeTracerMsgFromCAN(const struct can_frame *rx_frame, TracerMessage *msg)
 {
