@@ -273,13 +273,13 @@ typedef struct
     uint8_t motor_id;
     union {
         struct
-        {
-           int8_t driver_state;
+        {           
            int8_t reserved0;
            int8_t reserved1;
            int8_t reserved2;
            int8_t reserved3;
            int8_t reserved4;
+           int8_t driver_state;
            int8_t reserved5;
            int8_t reserved6;
         } status;
@@ -322,6 +322,9 @@ typedef enum
     TracerSystemStatusMsg = 0x03,
     TracerMotorDriverStatusMsg = 0x04,
     TracerOdometerMsg = 0x05,
+    TracerHeighSpeedMsg = 0x06,
+    TracerLowSpeedMsg = 0x07,
+
     // control messages
     TracerMotionCmdMsg = 0x21,
     TracerLightControlMsg = 0x22,
@@ -337,11 +340,15 @@ typedef struct
         LightStatusMessage light_status_msg;
         SystemStatusMessage system_status_msg;
         MotorDriverStatusMessage motor_driver_status_msg;
+        OdometerMessage odom_msg;
+        MotorHeightSpeedStatusMessage motor_heigh_speed_msg;
+        MotorLowSpeedStatusMessage motor_low_speed_msg;
+
         // control messages
         MotionCmdMessage motion_cmd_msg;
         LightControlMessage light_control_msg;
         ModSelectMessage mode_cmd_msg;
-        OdometerMessage odom_msg;
+
     } body;
 } TracerMessage;
 

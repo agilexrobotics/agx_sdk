@@ -19,9 +19,9 @@ struct TracerState
 {
     struct MotorState
     {
-        double current = 0; // in A
+        //double current = 0; // in A
         double rpm = 0;
-        double temperature = 0;
+        //double temperature = 0;
     };
 
     struct LightState

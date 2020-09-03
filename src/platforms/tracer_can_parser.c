@@ -37,14 +37,18 @@ bool DecodeTracerMsgFromCAN(const struct can_frame *rx_frame, TracerMessage *msg
     {
         msg->type = TracerMotorDriverStatusMsg;
         msg->body.motor_driver_status_msg.motor_id = TRACER_MOTOR1_ID;
+        msg->body.motor_heigh_speed_msg.motor_id=TRACER_MOTOR1_ID;
         memcpy(msg->body.motor_driver_status_msg.data.raw, rx_frame->data, rx_frame->can_dlc * sizeof(uint8_t));
+        memcpy(msg->body.motor_heigh_speed_msg.data.raw, rx_frame->data, rx_frame->can_dlc * sizeof(uint8_t));
         break;
     }
     case CAN_MSG_MOTOR2_DRIVER_STATUS_ID:
     {
         msg->type = TracerMotorDriverStatusMsg;
         msg->body.motor_driver_status_msg.motor_id = TRACER_MOTOR2_ID;
+        msg->body.motor_heigh_speed_msg.motor_id = TRACER_MOTOR2_ID;
         memcpy(msg->body.motor_driver_status_msg.data.raw, rx_frame->data, rx_frame->can_dlc * sizeof(uint8_t));
+        memcpy(msg->body.motor_heigh_speed_msg.data.raw, rx_frame->data, rx_frame->can_dlc * sizeof(uint8_t));
         break;
     }
     // in the current implementation, both MsgType and can_frame include 8 * uint8_t

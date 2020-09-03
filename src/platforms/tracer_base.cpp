@@ -355,12 +355,13 @@ void TracerBase::UpdateTracerState(const TracerMessage &status_msg, TracerState 
     case TracerMotorDriverStatusMsg:
     {
         // std::cout << "motor 1 driver feedback received" << std::endl;
-        const MotorDriverStatusMessage &msg = status_msg.body.motor_driver_status_msg;
+        //const MotorDriverStatusMessage &msg = status_msg.body.motor_driver_status_msg;
+        const MotorHeightSpeedStatusMessage &msg = status_msg.body.motor_heigh_speed_msg;
         for (int i = 0; i < 2; ++i)
         {
-            state.motor_states[status_msg.body.motor_driver_status_msg.motor_id].current = (static_cast<uint16_t>(msg.data.status.current.low_byte) | static_cast<uint16_t>(msg.data.status.current.high_byte) << 8) / 10.0;
-            state.motor_states[status_msg.body.motor_driver_status_msg.motor_id].rpm = static_cast<int16_t>(static_cast<uint16_t>(msg.data.status.rpm.low_byte) | static_cast<uint16_t>(msg.data.status.rpm.high_byte) << 8);
-            state.motor_states[status_msg.body.motor_driver_status_msg.motor_id].temperature = msg.data.status.temperature;
+            //state.motor_states[status_msg.body.motor_driver_status_msg.motor_id].current = (static_cast<uint16_t>(msg.data.status.current.low_byte) | static_cast<uint16_t>(msg.data.status.current.high_byte) << 8) / 10.0;
+            state.motor_states[status_msg.body.motor_heigh_speed_msg.motor_id].rpm = static_cast<int16_t>(static_cast<uint16_t>(msg.data.status.rpm.low_byte) | static_cast<uint16_t>(msg.data.status.rpm.high_byte) << 8);
+            ///state.motor_states[status_msg.body.motor_driver_status_msg.motor_id].temperature = msg.data.status.temperature;
         }
         break;
     }
@@ -368,10 +369,11 @@ void TracerBase::UpdateTracerState(const TracerMessage &status_msg, TracerState 
     {
         // std::cout << "Odometer msg feedback received" << std::endl;
         const OdometerMessage &msg = status_msg.body.odom_msg;
-        state.right_odomter=static_cast<int32_t>(static_cast<int32_t>(msg.data.status.rightodometer.lowest)|static_cast<int32_t>(msg.data.status.rightodometer.sec_lowest
-                                                                                                                                 >>8)|static_cast<int32_t>(msg.data.status.rightodometer.sec_highest>>16)|static_cast<int32_t>(msg.data.status.rightodometer.highest>>24));
-        state.left_odomter=static_cast<int32_t>(static_cast<int32_t>(msg.data.status.leftodometer.lowest)|static_cast<int32_t>(msg.data.status.leftodometer.sec_lowest
-                                                                                                                                 >>8)|static_cast<int32_t>(msg.data.status.leftodometer.sec_highest>>16)|static_cast<int32_t>(msg.data.status.leftodometer.highest>>24));
+        state.right_odomter=static_cast<int32_t>(static_cast<uint32_t>(msg.data.status.rightodometer.lowest)|static_cast<uint32_t>(msg.data.status.rightodometer.sec_lowest
+                                                                                                                                 )<<8|static_cast<uint32_t>(msg.data.status.rightodometer.sec_highest)<<16|static_cast<uint32_t>(msg.data.status.rightodometer.highest)<<24);
+        state.left_odomter=static_cast<int32_t>(static_cast<uint32_t>(msg.data.status.leftodometer.lowest)|static_cast<uint32_t>(msg.data.status.leftodometer.sec_lowest
+                                                                                                                                 )<<8|static_cast<uint32_t>(msg.data.status.leftodometer.sec_highest)<<16|static_cast<uint32_t>(msg.data.status.leftodometer.highest)<<24);
+
     }
     }
 }
