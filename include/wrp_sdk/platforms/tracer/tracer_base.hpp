@@ -16,9 +16,9 @@
 #include <mutex>
 #include <functional>
 
-#include "wrp_sdk/asyncio/async_can.hpp"
-#include "wrp_sdk/asyncio/async_serial.hpp"
-
+//#include "wrp_sdk/asyncio/async_can.hpp"
+//#include "wrp_sdk/asyncio/async_serial.hpp"
+#include "wrp_sdk/platforms/common/mobile_base.hpp"
 #include "wrp_sdk/platforms/tracer/tracer_protocol.h"
 #include "wrp_sdk/platforms/tracer/tracer_can_parser.h"
 
@@ -26,22 +26,22 @@
 
 namespace westonrobot
 {
-class TracerBase
+class TracerBase :public MobileBase
 {
 public:
-    TracerBase() = default;
-    ~TracerBase();
+    TracerBase() : MobileBase(){};;
+    ~TracerBase()= default;
 
     // do not allow copy
     TracerBase(const TracerBase &tracer) = delete;
-    TracerBase &operator=(const TracerBase &tracer) = delete;
+    //TracerBase &operator=(const TracerBase &tracer) = delete;
 
 public:
     // connect to roboot from CAN
-    void Connect(std::string dev_name);
+    //void Connect(std::string dev_name);
 
     // disconnect from roboot, only valid for serial port
-    void Disconnect();
+   // void Disconnect();
 
     // cmd thread runs at 100Hz (10ms) by default
     void SetCmdThreadPeriodMs(int32_t period_ms) { cmd_thread_period_ms_ = period_ms; };
@@ -59,8 +59,8 @@ public:
 
 private:
     // hardware communication interface
-    std::shared_ptr<ASyncCAN> can_if_;
-    std::shared_ptr<ASyncSerial> serial_if_;
+    //std::shared_ptr<AsyncCAN> can_if_;
+    //std::shared_ptr<AsyncSerial> serial_if_;
 
     // CAN priority higher than serial if both connected
     bool can_connected_ = false;
@@ -91,14 +91,15 @@ private:
     void ConfigureCANBus(const std::string &can_if_name = "can1");
     void ConfigureSerial(const std::string uart_name = "/dev/ttyUSB0", int32_t baud_rate = 115200);
 
-    void StartCmdThread();
-    void ControlLoop(int32_t period_ms);
+    //void StartCmdThread();
+    //void ControlLoop(int32_t period_ms);
 
     void SendMotionCmd(uint8_t count);
+    void SendRobotCmd() override;
     void SendLightCmd(uint8_t count);
     void SendControlCmd();
-    void ParseCANFrame(can_frame *rx_frame);
-    void ParseUARTBuffer(uint8_t *buf, const size_t bufsize, size_t bytes_received);
+    void ParseCANFrame(can_frame *rx_frame) override;
+    void ParseUARTBuffer(uint8_t *buf, const size_t bufsize, size_t bytes_received) override{};
 
     void NewStatusMsgReceivedCallback(const TracerMessage &msg);
 

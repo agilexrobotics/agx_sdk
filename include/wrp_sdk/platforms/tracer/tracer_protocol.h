@@ -295,17 +295,17 @@ typedef struct
         {
           struct
           {
-            int8_t highest;
-            int8_t sec_highest;
-            int8_t lowest;
-            int8_t sec_lowest;
+            uint8_t highest;
+            uint8_t sec_highest;
+            uint8_t sec_lowest;
+            uint8_t lowest;
           }leftodometer;
           struct
           {
-            int8_t highest;
-            int8_t sec_highest;
-            int8_t lowest;
-            int8_t sec_lowest;
+            uint8_t highest;
+            uint8_t sec_highest;
+            uint8_t sec_lowest;
+            uint8_t lowest;
           }rightodometer;
         } status;
         uint8_t raw[8];

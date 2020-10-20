@@ -61,7 +61,7 @@ bool DecodeTracerMsgFromCAN(const struct can_frame *rx_frame, TracerMessage *msg
     case CAN_MSG_ODOMETER_ID:
     {
         msg->type = TracerOdometerMsg;
-        memcpy(msg->body.motion_cmd_msg.data.raw, rx_frame->data, rx_frame->can_dlc * sizeof(uint8_t));
+        memcpy(msg->body.odom_msg.data.raw, rx_frame->data, rx_frame->can_dlc * sizeof(uint8_t));
         break;
     }
     default:
@@ -107,7 +107,7 @@ void EncodeTracerMsgToCAN(const TracerMessage *msg, struct can_frame *tx_frame)
     }
     case TracerModeControlMsg:
     {
-        EncodeTracerModeControlMsgToCAN(&(msg->body.motion_cmd_msg), tx_frame);
+        EncodeTracerModeControlMsgToCAN(&(msg->body.odom_msg), tx_frame);
         break;
     }
     default:

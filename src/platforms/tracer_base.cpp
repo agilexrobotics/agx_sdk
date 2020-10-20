@@ -14,77 +14,21 @@
 
 namespace westonrobot
 {
-TracerBase::~TracerBase()
-{
-    if (serial_connected_)
-        serial_if_->close();
-
-    if (cmd_thread_.joinable())
-        cmd_thread_.join();
+void TracerBase::SendRobotCmd() {
+  static uint8_t cmd_count = 0;
+  static uint8_t light_cmd_count = 0;
+  SendMotionCmd(cmd_count++);
+  SendControlCmd();
+  if (light_ctrl_requested_) SendLightCmd(light_cmd_count++);
 }
 
-void TracerBase::Connect(std::string dev_name)
-{
-  //   if (baud_rate == 0) {
-  ConfigureCANBus(dev_name);
-  //   } else {
-  //     ConfigureSerial(dev_name, baud_rate);
-
-  //     if (!serial_connected_)
-  //       std::cerr << "ERROR: Failed to connect to serial port" << std::endl;
-  //   }
-}
-
-void TracerBase::Disconnect()
-{
-    if (serial_connected_)
-    {
-        if (serial_if_->is_open())
-            serial_if_->close();
-    }
-}
-
-void TracerBase::ConfigureCANBus(const std::string &can_if_name)
-{
-    can_if_ = std::make_shared<ASyncCAN>(can_if_name);
-
-    can_if_->set_receive_callback(std::bind(&TracerBase::ParseCANFrame, this, std::placeholders::_1));
-
-    can_connected_ = true;
-}
-
-void TracerBase::ConfigureSerial(const std::string uart_name, int32_t baud_rate)
-{
-    serial_if_ = std::make_shared<ASyncSerial>(uart_name, baud_rate);
-    serial_if_->open();
-
-    if (serial_if_->is_open())
-        serial_connected_ = true;
-
-    serial_if_->set_receive_callback(std::bind(&TracerBase::ParseUARTBuffer, this,
-                                               std::placeholders::_1,
-                                               std::placeholders::_2,
-                                               std::placeholders::_3));
-}
-
-void TracerBase::StartCmdThread()
-{
-    current_motion_cmd_.linear_velocity_H = 0;
-    current_motion_cmd_.linear_velocity_L = 0;
-    current_motion_cmd_.angular_velocity_H = 0;
-    current_motion_cmd_.angular_velocity_L = 0;
-    current_motion_cmd_.fault_clear_flag = TracerMotionCmd::FaultClearFlag::NO_FAULT;
-
-    cmd_thread_ = std::thread(std::bind(&TracerBase::ControlLoop, this, cmd_thread_period_ms_));
-    cmd_thread_started_ = true;
-}
 
 void TracerBase::SendMotionCmd(uint8_t count)
 {
     // motion control message
     TracerMessage m_msg;
     m_msg.type = TracerMotionCmdMsg;
-
+    SendControlCmd();
     motion_cmd_mutex_.lock();
     m_msg.body.motion_cmd_msg.data.cmd.linear_velocity.H_byte = current_motion_cmd_.linear_velocity_H;
     m_msg.body.motion_cmd_msg.data.cmd.linear_velocity.L_byte = current_motion_cmd_.linear_velocity_L;
@@ -109,7 +53,7 @@ void TracerBase::SendMotionCmd(uint8_t count)
 //        std::cout<<std::hex <<(unsigned int) (unsigned char)m_frame.data[1]<<" ";
 //        std::cout<<std::hex <<(unsigned int) (unsigned char)m_frame.data[2]<<" ";
 //        std::cout<<std::hex <<(unsigned int) (unsigned char)m_frame.data[3]<<" "<<"\n"<<std::endl;
-        can_if_->send_frame(m_frame);
+        can_if_->SendFrame(m_frame);
     }
     else
     {
@@ -164,7 +108,7 @@ void TracerBase::SendLightCmd(uint8_t count)
         can_frame l_frame;
         EncodeTracerMsgToCAN(&l_msg, &l_frame);
 
-        can_if_->send_frame(l_frame);
+        can_if_->SendFrame(l_frame);
     }
     // else
     // {
@@ -204,7 +148,7 @@ void TracerBase::SendControlCmd()
           // send to can bus
           can_frame c_frame;
           EncodeTracerMsgToCAN(&c_msg, &c_frame);
-          can_if_->send_frame(c_frame);
+          can_if_->SendFrame(c_frame);
       }
       else
       {
@@ -215,27 +159,7 @@ void TracerBase::SendControlCmd()
       }
 }
 
-void TracerBase::ControlLoop(int32_t period_ms)
-{
-    StopWatch ctrl_sw;
-    uint8_t cmd_count = 0;
-    uint8_t light_cmd_count = 0;
-    while (true)
-    {
-        ctrl_sw.tic();
-        //CAN communicate message
-        SendControlCmd();
-        // motion control message
-        SendMotionCmd(cmd_count++);
 
-        // check if there is request for light control
-        if (light_ctrl_requested_)
-            SendLightCmd(light_cmd_count++);
-
-        ctrl_sw.sleep_until_ms(period_ms);
-        // std::cout << "control loop update frequency: " << 1.0 / ctrl_sw.toc() << std::endl;
-    }
-}
 
 TracerState TracerBase::GetTracerState()
 {
@@ -294,20 +218,20 @@ void TracerBase::ParseCANFrame(can_frame *rx_frame)
     NewStatusMsgReceivedCallback(status_msg);
 }
 
-void TracerBase::ParseUARTBuffer(uint8_t *buf, const size_t bufsize, size_t bytes_received)
-{
-    // std::cout << "bytes received from serial: " << bytes_received << std::endl;
-    // serial_parser_.PrintStatistics();
-    // serial_parser_.ParseBuffer(buf, bytes_received);
+//void TracerBase::ParseUARTBuffer(uint8_t *buf, const size_t bufsize, size_t bytes_received)
+//{
+//    // std::cout << "bytes received from serial: " << bytes_received << std::endl;
+//    // serial_parser_.PrintStatistics();
+//    // serial_parser_.ParseBuffer(buf, bytes_received);
 
-    // TODO
-    // TracerMessage status_msg;
-    // for (int i = 0; i < bytes_received; ++i)
-    // {
-    //     if (DecodeTracerMsgFromUART(buf[i], &status_msg))
-    //         NewStatusMsgReceivedCallback(status_msg);
-    // }
-}
+//    // TODO
+//    // TracerMessage status_msg;
+//    // for (int i = 0; i < bytes_received; ++i)
+//    // {
+//    //     if (DecodeTracerMsgFromUART(buf[i], &status_msg))
+//    //         NewStatusMsgReceivedCallback(status_msg);
+//    // }
+//}
 
 void TracerBase::NewStatusMsgReceivedCallback(const TracerMessage &msg)
 {
@@ -369,10 +293,8 @@ void TracerBase::UpdateTracerState(const TracerMessage &status_msg, TracerState 
     {
         // std::cout << "Odometer msg feedback received" << std::endl;
         const OdometerMessage &msg = status_msg.body.odom_msg;
-        state.right_odomter=static_cast<int32_t>(static_cast<uint32_t>(msg.data.status.rightodometer.lowest)|static_cast<uint32_t>(msg.data.status.rightodometer.sec_lowest
-                                                                                                                                 )<<8|static_cast<uint32_t>(msg.data.status.rightodometer.sec_highest)<<16|static_cast<uint32_t>(msg.data.status.rightodometer.highest)<<24);
-        state.left_odomter=static_cast<int32_t>(static_cast<uint32_t>(msg.data.status.leftodometer.lowest)|static_cast<uint32_t>(msg.data.status.leftodometer.sec_lowest
-                                                                                                                                 )<<8|static_cast<uint32_t>(msg.data.status.leftodometer.sec_highest)<<16|static_cast<uint32_t>(msg.data.status.leftodometer.highest)<<24);
+        state.right_odomter=static_cast<int32_t>((static_cast<uint32_t>(msg.data.status.rightodometer.lowest))|(static_cast<uint32_t>(msg.data.status.rightodometer.sec_lowest)<<8)|(static_cast<uint32_t>(msg.data.status.rightodometer.sec_highest)<<16)|(static_cast<uint32_t>(msg.data.status.rightodometer.highest)<<24));
+        state.left_odomter=static_cast<int32_t>((static_cast<uint32_t>(msg.data.status.leftodometer.lowest))|(static_cast<uint32_t>(msg.data.status.leftodometer.sec_lowest)<<8)|(static_cast<uint32_t>(msg.data.status.leftodometer.sec_highest)<<16)|(static_cast<uint32_t>(msg.data.status.leftodometer.highest)<<24));
 
     }
     }

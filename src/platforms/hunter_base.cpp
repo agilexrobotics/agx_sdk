@@ -50,7 +50,7 @@ void HunterBase::SendMotionCmd(uint8_t count) {
   if (can_connected_) {
     can_frame m_frame;
     EncodeHunterMsgToCAN(&m_msg, &m_frame);
-    can_if_->send_frame(m_frame);
+    can_if_->SendFrame(m_frame);
   }
 }
 
@@ -80,6 +80,8 @@ void HunterBase::SetMotionCommand(
   current_motion_cmd_.angular_velocity = static_cast<int8_t>(
       steering_angle / HunterMotionCmd::max_steering_angle * 100.0);
   current_motion_cmd_.fault_clear_flag = fault_clr_flag;
+
+  FeedCmdTimeoutWatchdog();
 }
 
 void HunterBase::ParseCANFrame(can_frame *rx_frame) {
