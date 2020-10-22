@@ -40,11 +40,9 @@ extern "C" {
 #define CAN_MSG_MOTOR1_HEIGHT_DRIVER_STATUS_ID  ((uint32_t)0x251)
 #define CAN_MSG_MOTOR2_HEIGHT_DRIVER_STATUS_ID  ((uint32_t)0x252)
 #define CAN_MSG_MOTOR3_HEIGHT_DRIVER_STATUS_ID  ((uint32_t)0x253)
-#define CAN_MSG_MOTOR4_HEIGHT_DRIVER_STATUS_ID  ((uint32_t)0x254)
 #define CAN_MSG_MOTOR1_LOW_DRIVER_STATUS_ID     ((uint32_t)0x261)
 #define CAN_MSG_MOTOR2_LOW_DRIVER_STATUS_ID     ((uint32_t)0x262)
 #define CAN_MSG_MOTOR3_LOW_DRIVER_STATUS_ID     ((uint32_t)0x263)
-#define CAN_MSG_MOTOR4_LOW_DRIVER_STATUS_ID     ((uint32_t)0x264)
 #define CAN_MSG_PACK_CONTROL_ID                 ((uint32_t)0x131)
 //#define CAN_MSG_CONFIG_STATE_ID                 ((uint32_t)0x441)
 //#define CAN_MSG_CONFIG_ZERO_STEERING_ID         ((uint32_t)0x431)
@@ -58,7 +56,6 @@ extern "C" {
 #define CTRL_MODE_CMD_CAN               ((uint8_t)0x01)
 #define CTRL_MODE_CMD_UART              ((uint8_t)0x02)
 #define CTRL_MODE_COMMANDED             ((uint8_t)0x03)
-
 #define FAULT_CLR_NONE                  ((uint8_t)0x00)
 #define FAULT_CLR_BAT_UNDER_VOL         ((uint8_t)0x01)
 #define FAULT_CLR_BAT_OVER_VOL          ((uint8_t)0x02)
@@ -112,8 +109,8 @@ typedef struct {
         {
             struct
             {
-                int8_t high_byte;
-                int8_t low_byte;
+                uint8_t high_byte;
+                uint8_t low_byte;
             } linear_velocity_cmd;
             uint8_t reserved0;
             uint8_t reserved1;
@@ -121,8 +118,8 @@ typedef struct {
             uint8_t reserved3;
             struct
             {
-                int8_t high_byte;
-                int8_t low_byte;
+                uint8_t high_byte;
+                uint8_t low_byte;
             } angular_velocity_cmd;
         } cmd;
         uint8_t raw[8];
@@ -136,8 +133,8 @@ typedef struct {
         {
             struct
             {
-                int8_t high_byte;
-                int8_t low_byte;
+                uint8_t high_byte;
+                uint8_t low_byte;
             } linear_velocity;
             uint8_t reserved0;
             uint8_t reserved1;
@@ -145,8 +142,8 @@ typedef struct {
             uint8_t reserved3;
             struct
             {
-                int8_t high_byte;
-                int8_t low_byte;
+                uint8_t high_byte;
+                uint8_t low_byte;
             } angular_velocity;
         } status;
         uint8_t raw[8];
@@ -158,7 +155,7 @@ typedef struct {
     {
         struct
         {
-            uint8_t mode_cmd;
+            uint8_t mode_control;
             uint8_t reserved0;
             uint8_t reserved1;
             uint8_t reserved2;
@@ -205,21 +202,21 @@ typedef struct {
         {
             struct
             {
-                int8_t high_byte;
-                int8_t low_byte;
+                uint8_t high_byte;
+                uint8_t low_byte;
             } rpm;
             struct
             {
-                int8_t high_byte;
-                int8_t low_byte;
+                uint8_t high_byte;
+                uint8_t low_byte;
             } current;
             struct
             {
-                int8_t high1_byte;
-                int8_t high2_byte;
-                int8_t low1_byte;
-                int8_t low2_byte;
-            } location;
+                int8_t heighest;
+                int8_t sec_heighest;
+                int8_t sec_lowest;
+                int8_t lowest;
+            } moter_pose;
         } status;
         uint8_t raw[8];
     } data;
@@ -235,14 +232,14 @@ typedef struct {
             {
                 uint8_t high_byte;
                 uint8_t low_byte;
-            } drive_voltage;
+            } driver_voltage;
             struct
             {
-                int8_t high_byte;
-                int8_t low_byte;
-            } drive_temperature;
-            int8_t temperature;
-            uint8_t drive_status;
+                uint8_t high_byte;
+                uint8_t low_byte;
+            } driver_temperature;
+            uint8_t motor_temperature;
+            uint8_t driver_status;
             uint8_t reserved0;
             uint8_t reserved1;
         } status;
