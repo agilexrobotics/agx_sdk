@@ -25,14 +25,29 @@ extern "C" {
 #define HUNTER_MOTOR3_ID                 ((uint8_t)0x02)
 
 // CAN Definitions
-#define CAN_MSG_MOTION_CMD_ID            ((uint32_t)0x130)
-#define CAN_MSG_MOTION_STATUS_ID         ((uint32_t)0x131)
-#define CAN_MSG_CONFIG_CMD_ID            ((uint32_t)0x210)
-#define CAN_MSG_CONFIG_STATUS_ID         ((uint32_t)0x211)
-#define CAN_MSG_SYSTEM_STATUS_STATUS_ID  ((uint32_t)0x151)
-#define CAN_MSG_MOTOR1_DRIVER_STATUS_ID  ((uint32_t)0x201)
-#define CAN_MSG_MOTOR2_DRIVER_STATUS_ID  ((uint32_t)0x202)
-#define CAN_MSG_MOTOR3_DRIVER_STATUS_ID  ((uint32_t)0x203)
+//#define CAN_MSG_MOTION_CMD_ID            ((uint32_t)0x130)
+//#define CAN_MSG_MOTION_STATUS_ID         ((uint32_t)0x131)
+//#define CAN_MSG_CONFIG_CMD_ID            ((uint32_t)0x210)
+//#define CAN_MSG_CONFIG_STATUS_ID         ((uint32_t)0x211)
+//#define CAN_MSG_SYSTEM_STATUS_STATUS_ID  ((uint32_t)0x151)
+//#define CAN_MSG_MOTOR1_DRIVER_STATUS_ID  ((uint32_t)0x201)
+//#define CAN_MSG_MOTOR2_DRIVER_STATUS_ID  ((uint32_t)0x202)
+//#define CAN_MSG_MOTOR3_DRIVER_STATUS_ID  ((uint32_t)0x203)
+#define CAN_MSG_SYSTEM_STATUS_STATUS_ID         ((uint32_t)0x211)
+#define CAN_MSG_MOTION_STATUS_ID                ((uint32_t)0x221)
+#define CAN_MSG_MOTION_CMD_ID                   ((uint32_t)0x111)
+#define CAN_MSG_CONFIG_MODE_CMD_ID              ((uint32_t)0x421)
+#define CAN_MSG_CONFIG_STATE_ID                 ((uint32_t)0x441)
+#define CAN_MSG_HIGH_MOTOR1_DRIVER_STATUS_ID    ((uint32_t)0x251)
+#define CAN_MSG_HIGH_MOTOR2_DRIVER_STATUS_ID    ((uint32_t)0x252)
+#define CAN_MSG_HIGH_MOTOR3_DRIVER_STATUS_ID    ((uint32_t)0x253)
+#define CAN_MSG_LOW_MOTOR1_DRIVER_STATUS_ID     ((uint32_t)0x261)
+#define CAN_MSG_LOW_MOTOR2_DRIVER_STATUS_ID     ((uint32_t)0x262)
+#define CAN_MSG_LOW_MOTOR3_DRIVER_STATUS_ID     ((uint32_t)0x263)
+#define CAN_MSG_PACK_CMD_ID                     ((uint32_t)0x131)
+#define CAN_MSG_CONFIG_ZERO_STEERING_ID         ((uint32_t)0x431)
+#define CAN_MSG_CONFIG_ZERO_STEERING_STATUS_ID  ((uint32_t)0x43A)
+
 
 /*--------------------- Control/State Constants ------------------------*/
 
@@ -93,14 +108,28 @@ typedef struct {
     {
         struct
         {
-            uint8_t control_mode;
-            uint8_t fault_clear_flag;
-            int8_t linear_velocity_cmd;
-            int8_t angular_velocity_cmd;
+//            uint8_t control_mode;
+//            uint8_t fault_clear_flag;
+//            int8_t linear_velocity_cmd;
+//            int8_t angular_velocity_cmd;
+//            uint8_t reserved0;
+//            uint8_t reserved1;
+//            uint8_t count;
+//            uint8_t checksum;
+            struct
+            {
+                int8_t high_byte;
+                int8_t low_byte;
+            } linear_velocity_cmd;
             uint8_t reserved0;
             uint8_t reserved1;
-            uint8_t count;
-            uint8_t checksum;
+            uint8_t reserved2;
+            uint8_t reserved3;
+            struct
+            {
+                int8_t high_byte;
+                int8_t low_byte;
+            } angular_velocity_cmd;
         } cmd;
         uint8_t raw[8];
     } data;
@@ -111,20 +140,34 @@ typedef struct {
     {
         struct
         {
+//            struct
+//            {
+//                uint8_t high_byte;
+//                uint8_t low_byte;
+//            } linear_velocity;
+//            struct
+//            {
+//                uint8_t high_byte;
+//                uint8_t low_byte;
+//            } angular_velocity;
+//            uint8_t reserved0;
+//            uint8_t reserved1;
+//            uint8_t count;
+//            uint8_t checksum;
             struct
             {
-                uint8_t high_byte;
-                uint8_t low_byte;
+                int8_t high_byte;
+                int8_t low_byte;
             } linear_velocity;
-            struct
-            {
-                uint8_t high_byte;
-                uint8_t low_byte;
-            } angular_velocity;
             uint8_t reserved0;
             uint8_t reserved1;
-            uint8_t count;
-            uint8_t checksum;
+            uint8_t reserved2;
+            uint8_t reserved3;
+            struct
+            {
+                int8_t high_byte;
+                int8_t low_byte;
+            } angular_velocity;
         } status;
         uint8_t raw[8];
     } data;
@@ -148,76 +191,179 @@ typedef struct {
                 uint8_t high_byte;
                 uint8_t low_byte;
             } fault_code;
+            uint8_t pack_mode;
             uint8_t count;
-            uint8_t checksum;
         } status;
         uint8_t raw[8];
     } data;
 } SystemStatusMessage;
-
-// System Configuration
+//**-
 typedef struct {
     union
     {
         struct
         {
-            uint8_t set_zero_steering;
-            uint8_t reserved0;
-            uint8_t reserved1;
-            uint8_t reserved2;
-            uint8_t reserved3;
-            uint8_t reserved4;
-            uint8_t count;
-            uint8_t checksum;
+            uint8_t mode_cmd;
         } status;
-        uint8_t raw[8];
+        uint8_t raw[1];
     } data;
-} ConfigCmdMessage;
+} ConfigModeCmdMessage;
 
-// System Configuration Status Feedback
 typedef struct {
     union
     {
         struct
         {
-            uint8_t set_zero_steering;
-            uint8_t reserved0;
-            uint8_t reserved1;
-            uint8_t reserved2;
-            uint8_t reserved3;
-            uint8_t reserved4;
-            uint8_t count;
-            uint8_t checksum;
+            uint8_t state_config;
         } status;
-        uint8_t raw[8];
+        uint8_t raw[1];
     } data;
-} ConfigStatusMessage;
-
-// Motor Driver Feedback
-typedef struct
-{
+} ConfigStateMessage;
+typedef struct {
     uint8_t motor_id;
-    union {
+    union
+    {
         struct
         {
             struct
             {
-                uint8_t high_byte;
-                uint8_t low_byte;
+                int8_t high_byte;
+                int8_t low_byte;
+            } rpm;
+            struct
+            {
+                int8_t high_byte;
+                int8_t low_byte;
             } current;
             struct
             {
-                uint8_t high_byte;
-                uint8_t low_byte;
-            } rpm;
-            int8_t temperature;
-            uint8_t reserved0;
-            uint8_t count;
-            uint8_t checksum;
+                int8_t high1_byte;
+                int8_t high2_byte;
+                int8_t low1_byte;
+                int8_t low2_byte;
+            } location;
         } status;
         uint8_t raw[8];
     } data;
-} MotorDriverStatusMessage;
+} HighMotorDriverStatusMessage;
+typedef struct {
+    uint8_t motor_id;
+    union
+    {
+        struct
+        {
+            struct
+            {
+                uint8_t high_byte;
+                uint8_t low_byte;
+            } drive_voltage;
+            struct
+            {
+                int8_t high_byte;
+                int8_t low_byte;
+            } drive_temperature;
+            int8_t temperature;
+            uint8_t drive_status;
+            uint8_t reserved0;
+            uint8_t reserved1;
+        } status;
+        uint8_t raw[8];
+    } data;
+} LowMotorDriverStatusMessage;
+typedef struct {
+    union
+    {
+        struct
+        {
+           uint8_t packing_mode;
+        } status;
+        uint8_t raw[1];
+    } data;
+} PackCmdMessage;
+typedef struct {
+    union
+    {
+        struct
+        {
+            uint8_t set_zero_steering;
+        } status;
+        uint8_t raw[1];
+    } data;
+} ConfigZeroSteeringMessage;
+typedef struct {
+    union
+    {
+        struct
+        {
+            uint8_t answer_zero_steering;
+        } status;
+        uint8_t raw[1];
+    } data;
+} ConfigZeroSteeringStatusMessage;
+//-**
+// System Configuration
+//typedef struct {
+//    union
+//    {
+//        struct
+//        {
+//            uint8_t set_zero_steering;
+//            uint8_t reserved0;
+//            uint8_t reserved1;
+//            uint8_t reserved2;
+//            uint8_t reserved3;
+//            uint8_t reserved4;
+//            uint8_t count;
+//            uint8_t checksum;
+//        } status;
+//        uint8_t raw[8];
+//    } data;
+//} ConfigCmdMessage;
+
+// System Configuration Status Feedback
+//typedef struct {
+//    union
+//    {
+//        struct
+//        {
+//            uint8_t set_zero_steering;
+//            uint8_t reserved0;
+//            uint8_t reserved1;
+//            uint8_t reserved2;
+//            uint8_t reserved3;
+//            uint8_t reserved4;
+//            uint8_t count;
+//            uint8_t checksum;
+//        } status;
+//        uint8_t raw[8];
+//    } data;
+//} ConfigStatusMessage;
+
+// Motor Driver Feedback
+//typedef struct
+//{
+//    uint8_t motor_id;
+//    union {
+//        struct
+//        {
+//            struct
+//            {
+//                uint8_t high_byte;
+//                uint8_t low_byte;
+//            } current;
+//            struct
+//            {
+//                uint8_t high_byte;
+//                uint8_t low_byte;
+//            } rpm;
+//            int8_t temperature;
+//            uint8_t reserved0;
+//            uint8_t count;
+//            uint8_t checksum;
+//        } status;
+//        uint8_t raw[8];
+//    } data;
+//} MotorDriverStatusMessage2;
 
 // For convenience to access status/control message
 typedef enum
