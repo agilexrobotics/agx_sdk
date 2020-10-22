@@ -1,1 +1,0 @@
-/usr/bin/c++  -O3 -DNDEBUG   CMakeFiles/app_hunter_demo.dir/hunter_demo/hunter_demo.cpp.o  -o ../bin/app_hunter_demo ../lib/libwrp_sdk.a -lpthread 
