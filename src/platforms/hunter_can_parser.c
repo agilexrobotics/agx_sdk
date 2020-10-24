@@ -8,11 +8,11 @@
  */ 
 
 #include "wrp_sdk/platforms/hunter/hunter_can_parser.h"
-
 #include "string.h"
 
 static void EncodeHunterMotionControlMsgToCAN(const MotionControlMessage *msg, struct can_frame *tx_frame);
 static void EncodeHunterControlModeMsgToCAN(const ModSelectMessage *msg,struct can_frame *tx_frame);
+static void EncodeHunterControlPackMsgToCAN(const PackControlMessage *msg,struct can_frame *tx_frame);
 
 bool DecodeHunterMsgFromCAN(const struct can_frame *rx_frame, HunterMessage *msg)
 {
@@ -62,23 +62,23 @@ bool DecodeHunterMsgFromCAN(const struct can_frame *rx_frame, HunterMessage *msg
     }
     case CAN_MSG_MOTOR1_LOW_DRIVER_STATUS_ID:
     {
-        msg->type = HunterMotorDriverHeightSpeedStatusMsg;
-        msg->body.motor_driver_height_speed_status_msg.motor_id = HUNTER_MOTOR1_ID;
-        memcpy(msg->body.motor_driver_height_speed_status_msg.data.raw, rx_frame->data, rx_frame->can_dlc * sizeof(uint8_t));
+        msg->type = HunterMotorDriverLowSpeedStatusMsg;
+        msg->body.motor_driver_low_speed_status_msg.motor_id = HUNTER_MOTOR1_ID;
+        memcpy(msg->body.motor_driver_low_speed_status_msg.data.raw, rx_frame->data, rx_frame->can_dlc * sizeof(uint8_t));
         break;
     }
     case CAN_MSG_MOTOR2_LOW_DRIVER_STATUS_ID:
     {
-        msg->type = HunterMotorDriverHeightSpeedStatusMsg;
-        msg->body.motor_driver_height_speed_status_msg.motor_id = HUNTER_MOTOR2_ID;
-        memcpy(msg->body.motor_driver_height_speed_status_msg.data.raw, rx_frame->data, rx_frame->can_dlc * sizeof(uint8_t));
+        msg->type = HunterMotorDriverLowSpeedStatusMsg;
+        msg->body.motor_driver_low_speed_status_msg.motor_id = HUNTER_MOTOR2_ID;
+        memcpy(msg->body.motor_driver_low_speed_status_msg.data.raw, rx_frame->data, rx_frame->can_dlc * sizeof(uint8_t));
         break;
     }
     case CAN_MSG_MOTOR3_LOW_DRIVER_STATUS_ID:
     {
-        msg->type = HunterMotorDriverHeightSpeedStatusMsg;
-        msg->body.motor_driver_height_speed_status_msg.motor_id = HUNTER_MOTOR3_ID;
-        memcpy(msg->body.motor_driver_height_speed_status_msg.data.raw, rx_frame->data, rx_frame->can_dlc * sizeof(uint8_t));
+        msg->type = HunterMotorDriverLowSpeedStatusMsg;
+        msg->body.motor_driver_low_speed_status_msg.motor_id = HUNTER_MOTOR3_ID;
+        memcpy(msg->body.motor_driver_low_speed_status_msg.data.raw, rx_frame->data, rx_frame->can_dlc * sizeof(uint8_t));
         break;
     }
     case CAN_MSG_MOTION_CONTROL_CMD_ID:
@@ -148,6 +148,12 @@ void EncodeHunterMsgToCAN(const HunterMessage *msg, struct can_frame *tx_frame)
         EncodeHunterControlModeMsgToCAN(&(msg->body.mode_cmd_msg), tx_frame);
         break;
     }
+    case HunterPackControlMsg:
+    {
+        EncodeHunterControlPackMsgToCAN(&(msg->body.pack_control_msg), tx_frame);
+
+        break;
+    }
 //    case HunterMotorDriverStatusMsg:
 //    {
 //        if (msg->body.motor_driver_status_msg.motor_id == HUNTER_MOTOR1_ID)
@@ -166,7 +172,7 @@ void EncodeHunterMsgToCAN(const HunterMessage *msg, struct can_frame *tx_frame)
     default:
         break;
     }
-    tx_frame->data[7] = CalcHunterCANChecksum(tx_frame->can_id, tx_frame->data, tx_frame->can_dlc);
+    //tx_frame->data[7] = CalcHunterCANChecksum(tx_frame->can_id, tx_frame->data, tx_frame->can_dlc);
 }
 
 void EncodeHunterMotionControlMsgToCAN(const MotionControlMessage *msg, struct can_frame *tx_frame)
@@ -174,14 +180,22 @@ void EncodeHunterMotionControlMsgToCAN(const MotionControlMessage *msg, struct c
     tx_frame->can_id = CAN_MSG_MOTION_CONTROL_CMD_ID;
     tx_frame->can_dlc = 8;
     memcpy(tx_frame->data, msg->data.raw, tx_frame->can_dlc);
+    //std::cout << "Warning: cmd timeout, old cmd not sent to robot" << std::endl;
     //tx_frame->data[7] = CalcHunterCANChecksum(tx_frame->can_id, tx_frame->data, tx_frame->can_dlc);
 }
 void EncodeHunterControlModeMsgToCAN(const ModSelectMessage *msg,struct can_frame *tx_frame)
 {
-    tx_frame->can_id = CAN_MSG_MOTION_CONTROL_CMD_ID;
+    tx_frame->can_id = CAN_MSG_SELECT_CONTROL_MODE_ID;
     tx_frame->can_dlc = 8;
     memcpy(tx_frame->data, msg->data.raw, tx_frame->can_dlc);
 }
+void EncodeHunterControlPackMsgToCAN(const PackControlMessage *msg,struct can_frame *tx_frame)
+{
+    tx_frame->can_id = CAN_MSG_PACK_CONTROL_ID;
+    tx_frame->can_dlc = 8;
+    memcpy(tx_frame->data, msg->data.raw, tx_frame->can_dlc);
+}
+
 uint8_t CalcHunterCANChecksum(uint16_t id, uint8_t *data, uint8_t dlc)
 {
     uint8_t checksum = 0x00;

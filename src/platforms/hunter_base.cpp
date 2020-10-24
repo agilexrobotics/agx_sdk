@@ -17,10 +17,10 @@ namespace westonrobot {
 void HunterBase::SendRobotCmd() {
   static uint8_t cmd_count = 0;
   SendModeCtl();
-  SendMotionCmd(cmd_count++);
   bool flag = current_motion_cmd_.linear_velocity_height_byte || current_motion_cmd_.linear_velocity_low_byte;
+  //std::cout <<flag<<std::endl;
   SetPackMode(flag);
-
+  SendMotionCmd(cmd_count++);
 }
 
 void HunterBase::SendMotionCmd(uint8_t count) {
@@ -96,6 +96,8 @@ void HunterBase::SetMotionCommand(
   current_motion_cmd_.angular_velocity_height_byte = static_cast<int16_t>(angular_vel*1000)>>8;
   current_motion_cmd_.angular_velocity_low_byte = static_cast<int16_t>(angular_vel*1000)&0xff;
   current_motion_cmd_.fault_clear_flag = fault_clr_flag;
+  //std::cout <<"linear_vel:"<<linear_vel<<std::endl;
+  //std::cout <<"angular_vel:"<<angular_vel<<std::endl;
 //  current_motion_cmd_.linear_velocity = static_cast<int8_t>(
 //      linear_vel / HunterMotionCmd::max_linear_velocity * 100.0);
 //  current_motion_cmd_.angular_velocity = static_cast<int8_t>(
@@ -128,6 +130,8 @@ void HunterBase::SendModeCtl(){
 
 void HunterBase::SetPackMode(bool flag){
   HunterMessage m_msg;
+  flag =true;
+  m_msg.type = HunterPackControlMsg;
   if(flag)
   {
     pack_mode_cmd_mutex_.lock();
@@ -215,17 +219,16 @@ void HunterBase::UpdateHunterState(const HunterMessage &status_msg,
       const MotorDriverHeightSpeedStatusMessage &msg =
           status_msg.body.motor_driver_height_speed_status_msg;
       for (int i = 0; i < HunterState::motor_num; ++i) {
-        state.motor_H_state[status_msg.body.motor_driver_height_speed_status_msg.motor_id]
-            .current =
-            (static_cast<uint16_t>(msg.data.status.current.low_byte) |
+        state.motor_H_state[msg.motor_id].current
+           =(static_cast<uint16_t>(msg.data.status.current.low_byte) |
              static_cast<uint16_t>(msg.data.status.current.high_byte) << 8) /
             10.0;
-        state.motor_H_state[status_msg.body.motor_driver_height_speed_status_msg.motor_id]
-            .rpm = static_cast<int16_t>(
+        state.motor_H_state[msg.motor_id].rpm
+           = static_cast<int16_t>(
             static_cast<uint16_t>(msg.data.status.rpm.low_byte) |
             static_cast<uint16_t>(msg.data.status.rpm.high_byte) << 8);
-        state.motor_H_state[status_msg.body.motor_driver_height_speed_status_msg.motor_id]
-            .motor_pose = static_cast<int32_t>(static_cast<uint32_t>(msg.data.status.moter_pose.lowest) |
+        state.motor_H_state[msg.motor_id].motor_pose
+           = static_cast<int32_t>(static_cast<uint32_t>(msg.data.status.moter_pose.lowest) |
                                                static_cast<uint32_t>(msg.data.status.moter_pose.sec_lowest) << 8 |
                                                static_cast<uint32_t>(msg.data.status.moter_pose.sec_heighest)<<16|
                                                static_cast<uint32_t>(msg.data.status.moter_pose.heighest)<<24);
@@ -237,19 +240,18 @@ void HunterBase::UpdateHunterState(const HunterMessage &status_msg,
       const MotorDriverLowSpeedStatusMessage &msg =
           status_msg.body.motor_driver_low_speed_status_msg;
       for (int i = 0; i < HunterState::motor_num; ++i) {
-        state.motor_L_state[status_msg.body.motor_driver_low_speed_status_msg.motor_id]
-            .driver_voltage =
-            (static_cast<uint16_t>(msg.data.status.driver_voltage.low_byte) |
+        state.motor_L_state[msg.motor_id].driver_voltage
+           =(static_cast<uint16_t>(msg.data.status.driver_voltage.low_byte) |
              static_cast<uint16_t>(msg.data.status.driver_voltage.high_byte) << 8) /
             10.0;
-        state.motor_L_state[status_msg.body.motor_driver_low_speed_status_msg.motor_id]
-            .driver_temperature = static_cast<int16_t>(
+        state.motor_L_state[msg.motor_id].driver_temperature
+           = static_cast<int16_t>(
             static_cast<uint16_t>(msg.data.status.driver_temperature.low_byte) |
             static_cast<uint16_t>(msg.data.status.driver_temperature.high_byte) << 8);
-        state.motor_L_state[status_msg.body.motor_driver_low_speed_status_msg.motor_id]
-            .motor_temperature = msg.data.status.motor_temperature;
-        state.motor_L_state[status_msg.body.motor_driver_low_speed_status_msg.motor_id]
-            .driver_state = msg.data.status.driver_status;
+        state.motor_L_state[msg.motor_id].motor_temperature
+           = msg.data.status.motor_temperature;
+        state.motor_L_state[msg.motor_id].driver_state
+           = msg.data.status.driver_status;
       }
     }
 //    case HunterConfigStatusMsg: {

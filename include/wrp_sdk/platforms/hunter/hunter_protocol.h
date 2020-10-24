@@ -337,8 +337,8 @@ typedef enum
     // status messages
     HunterMotionStatusMsg = 0x01,
     HunterSystemStatusMsg = 0x02,
-    HunterMotorDriverHeightSpeedStatusMsg = 0x03,
-    HunterMotorDriverLowSpeedStatusMsg = 0x04,
+    HunterMotorDriverHeightSpeedStatusMsg = 0x04,
+    HunterMotorDriverLowSpeedStatusMsg = 0x05,
       //HunterMotorDriverStatusMsg = 0x04,
       //HunterConfigStatusMsg = 0x05,
     // control messages
