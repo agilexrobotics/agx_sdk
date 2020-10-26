@@ -18,7 +18,6 @@ void HunterBase::SendRobotCmd() {
   static uint8_t cmd_count = 0;
   SendModeCtl();
   bool flag = current_motion_cmd_.linear_velocity_height_byte || current_motion_cmd_.linear_velocity_low_byte;
-  //std::cout <<flag<<std::endl;
   SetPackMode(flag);
   SendMotionCmd(cmd_count++);
 }
@@ -130,25 +129,24 @@ void HunterBase::SendModeCtl(){
 
 void HunterBase::SetPackMode(bool flag){
   HunterMessage m_msg;
-  flag =true;
-  m_msg.type = HunterPackControlMsg;
+  m_msg.type = HunterParkControlMsg;
   if(flag)
   {
     pack_mode_cmd_mutex_.lock();
-    m_msg.body.pack_control_msg.data.cmd.packing_mode=0x00;
+    m_msg.body.park_control_msg.data.cmd.packing_mode=0x00;
     pack_mode_cmd_mutex_.unlock();
   }else {
     pack_mode_cmd_mutex_.lock();
-    m_msg.body.pack_control_msg.data.cmd.packing_mode=0x01;
+    m_msg.body.park_control_msg.data.cmd.packing_mode=0x01;
     pack_mode_cmd_mutex_.unlock();
   }
-  m_msg.body.pack_control_msg.data.cmd.reserved0=0;
-  m_msg.body.pack_control_msg.data.cmd.reserved1=0;
-  m_msg.body.pack_control_msg.data.cmd.reserved2=0;
-  m_msg.body.pack_control_msg.data.cmd.reserved3=0;
-  m_msg.body.pack_control_msg.data.cmd.reserved4=0;
-  m_msg.body.pack_control_msg.data.cmd.reserved5=0;
-  m_msg.body.pack_control_msg.data.cmd.reserved6=0;
+  m_msg.body.park_control_msg.data.cmd.reserved0=0;
+  m_msg.body.park_control_msg.data.cmd.reserved1=0;
+  m_msg.body.park_control_msg.data.cmd.reserved2=0;
+  m_msg.body.park_control_msg.data.cmd.reserved3=0;
+  m_msg.body.park_control_msg.data.cmd.reserved4=0;
+  m_msg.body.park_control_msg.data.cmd.reserved5=0;
+  m_msg.body.park_control_msg.data.cmd.reserved6=0;
   if (can_connected_) {
     // send to can bus
     can_frame m_frame;
@@ -158,16 +156,7 @@ void HunterBase::SetPackMode(bool flag){
 }
 
 void HunterBase::ParseCANFrame(can_frame *rx_frame) {
-  // validate checksum, discard frame if fails
-//  if (!rx_frame->data[7] == CalcHunterCANChecksum(rx_frame->can_id,
-//                                                  rx_frame->data,
-//                                                  rx_frame->can_dlc)) {
-//    std::cerr << "ERROR: checksum mismatch, discard frame with id "
-//              << rx_frame->can_id << std::endl;
-//    return;
-//  }
-
-  // otherwise, update robot state with new frame
+  // update robot state with new frame
   HunterMessage status_msg;
   DecodeHunterMsgFromCAN(rx_frame, &status_msg);
   NewStatusMsgReceivedCallback(status_msg);
@@ -203,6 +192,7 @@ void HunterBase::UpdateHunterState(const HunterMessage &status_msg,
       // std::cout << "system status feedback received" << std::endl;
       const SystemStatusMessage &msg = status_msg.body.system_status_msg;
       state.control_mode = msg.data.status.control_mode;
+      state.park_mode = msg.data.status.park_mode;
       state.base_state = msg.data.status.base_state;
       state.battery_voltage =
           (static_cast<uint16_t>(msg.data.status.battery_voltage.low_byte) |
@@ -225,13 +215,14 @@ void HunterBase::UpdateHunterState(const HunterMessage &status_msg,
             10.0;
         state.motor_H_state[msg.motor_id].rpm
            = static_cast<int16_t>(
-            static_cast<uint16_t>(msg.data.status.rpm.low_byte) |
-            static_cast<uint16_t>(msg.data.status.rpm.high_byte) << 8);
+              static_cast<uint16_t>(msg.data.status.rpm.low_byte) |
+              static_cast<uint16_t>(msg.data.status.rpm.high_byte) << 8);
         state.motor_H_state[msg.motor_id].motor_pose
-           = static_cast<int32_t>(static_cast<uint32_t>(msg.data.status.moter_pose.lowest) |
-                                               static_cast<uint32_t>(msg.data.status.moter_pose.sec_lowest) << 8 |
-                                               static_cast<uint32_t>(msg.data.status.moter_pose.sec_heighest)<<16|
-                                               static_cast<uint32_t>(msg.data.status.moter_pose.heighest)<<24);
+           = static_cast<int32_t>(
+              static_cast<uint32_t>(msg.data.status.moter_pose.lowest) |
+              static_cast<uint32_t>(msg.data.status.moter_pose.sec_lowest) <<  8 |
+              static_cast<uint32_t>(msg.data.status.moter_pose.sec_heighest)<< 16|
+              static_cast<uint32_t>(msg.data.status.moter_pose.heighest)<< 24 );
       }
       break;
     }
@@ -246,14 +237,22 @@ void HunterBase::UpdateHunterState(const HunterMessage &status_msg,
             10.0;
         state.motor_L_state[msg.motor_id].driver_temperature
            = static_cast<int16_t>(
-            static_cast<uint16_t>(msg.data.status.driver_temperature.low_byte) |
-            static_cast<uint16_t>(msg.data.status.driver_temperature.high_byte) << 8);
+              static_cast<uint16_t>(msg.data.status.driver_temperature.low_byte) |
+              static_cast<uint16_t>(msg.data.status.driver_temperature.high_byte) << 8);
         state.motor_L_state[msg.motor_id].motor_temperature
            = msg.data.status.motor_temperature;
         state.motor_L_state[msg.motor_id].driver_state
            = msg.data.status.driver_status;
       }
     }
+//    case HunterControlModeMsg:{
+//      const ModSelectMessage &msg = status_msg.body.mode_cmd_msg;
+//      state.control_mode2 = msg.data.cmd.mode_control;
+//    }
+//    case HunterParkControlMsg:{
+//      const ParkControlMessage &msg = status_msg.body.park_control_msg;
+//      state.park_mode2 = msg.data.cmd.packing_mode;
+//    }
 //    case HunterConfigStatusMsg: {
 //      const ConfigStatusMessage &msg = status_msg.body.config_status_msg;
 //      state.set_zero_steering = msg.data.status.set_zero_steering;

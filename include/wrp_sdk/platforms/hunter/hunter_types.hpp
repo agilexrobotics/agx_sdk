@@ -17,19 +17,19 @@ namespace westonrobot
 {
 struct HunterState
 {
-//    struct MotorState
-//    {
-//        double current = 0; // in A
-//        double rpm = 0;
-//        double temperature = 0;
-//        double motor_pose=0;
-//    };
-//    struct DriverState
-//    {
-//      double driver_voltage = 0;
-//      double driver_temperature = 0;
-//      uint8_t driver_state = 0;
-//    };
+/*    struct MotorState
+    {
+        double current = 0; // in A
+        double rpm = 0;
+        double temperature = 0;
+        double motor_pose=0;
+    };
+    struct DriverState
+    {
+      double driver_voltage = 0;
+      double driver_temperature = 0;
+      uint8_t driver_state = 0;
+    };*/
     struct MotorHeightSpeedState
     {
         double current = 0; // in A
@@ -46,6 +46,9 @@ struct HunterState
     // base state
     uint8_t base_state = 0;
     uint8_t control_mode = 0;
+    //uint8_t control_mode2 = 9;
+    uint8_t park_mode = 1;
+    //uint8_t park_mode2 = 9;
     uint16_t fault_code = 0;
     double battery_voltage = 0.0;
 

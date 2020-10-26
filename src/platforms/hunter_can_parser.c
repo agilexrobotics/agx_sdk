@@ -12,7 +12,7 @@
 
 static void EncodeHunterMotionControlMsgToCAN(const MotionControlMessage *msg, struct can_frame *tx_frame);
 static void EncodeHunterControlModeMsgToCAN(const ModSelectMessage *msg,struct can_frame *tx_frame);
-static void EncodeHunterControlPackMsgToCAN(const PackControlMessage *msg,struct can_frame *tx_frame);
+static void EncodeHunterControlParkMsgToCAN(const ParkControlMessage *msg,struct can_frame *tx_frame);
 
 bool DecodeHunterMsgFromCAN(const struct can_frame *rx_frame, HunterMessage *msg)
 {
@@ -87,10 +87,10 @@ bool DecodeHunterMsgFromCAN(const struct can_frame *rx_frame, HunterMessage *msg
         memcpy(msg->body.motion_control_msg.data.raw, rx_frame->data, rx_frame->can_dlc * sizeof(uint8_t));
         break;
     }
-    case CAN_MSG_PACK_CONTROL_ID:
+    case CAN_MSG_PARK_CONTROL_ID:
     {
-         msg->type = HunterPackControlMsg;
-         memcpy(msg->body.pack_control_msg.data.raw, rx_frame->data, rx_frame->can_dlc * sizeof(uint8_t));
+         msg->type = HunterParkControlMsg;
+         memcpy(msg->body.park_control_msg.data.raw, rx_frame->data, rx_frame->can_dlc * sizeof(uint8_t));
          break;
     }
     case CAN_MSG_SELECT_CONTROL_MODE_ID:
@@ -148,9 +148,9 @@ void EncodeHunterMsgToCAN(const HunterMessage *msg, struct can_frame *tx_frame)
         EncodeHunterControlModeMsgToCAN(&(msg->body.mode_cmd_msg), tx_frame);
         break;
     }
-    case HunterPackControlMsg:
+    case HunterParkControlMsg:
     {
-        EncodeHunterControlPackMsgToCAN(&(msg->body.pack_control_msg), tx_frame);
+        EncodeHunterControlParkMsgToCAN(&(msg->body.park_control_msg), tx_frame);
 
         break;
     }
@@ -186,13 +186,13 @@ void EncodeHunterMotionControlMsgToCAN(const MotionControlMessage *msg, struct c
 void EncodeHunterControlModeMsgToCAN(const ModSelectMessage *msg,struct can_frame *tx_frame)
 {
     tx_frame->can_id = CAN_MSG_SELECT_CONTROL_MODE_ID;
-    tx_frame->can_dlc = 8;
+    tx_frame->can_dlc = 1;
     memcpy(tx_frame->data, msg->data.raw, tx_frame->can_dlc);
 }
-void EncodeHunterControlPackMsgToCAN(const PackControlMessage *msg,struct can_frame *tx_frame)
+void EncodeHunterControlParkMsgToCAN(const ParkControlMessage *msg,struct can_frame *tx_frame)
 {
-    tx_frame->can_id = CAN_MSG_PACK_CONTROL_ID;
-    tx_frame->can_dlc = 8;
+    tx_frame->can_id = CAN_MSG_PARK_CONTROL_ID;
+    tx_frame->can_dlc = 1;
     memcpy(tx_frame->data, msg->data.raw, tx_frame->can_dlc);
 }
 

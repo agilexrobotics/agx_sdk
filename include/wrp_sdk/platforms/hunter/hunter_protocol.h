@@ -43,7 +43,7 @@ extern "C" {
 #define CAN_MSG_MOTOR1_LOW_DRIVER_STATUS_ID     ((uint32_t)0x261)
 #define CAN_MSG_MOTOR2_LOW_DRIVER_STATUS_ID     ((uint32_t)0x262)
 #define CAN_MSG_MOTOR3_LOW_DRIVER_STATUS_ID     ((uint32_t)0x263)
-#define CAN_MSG_PACK_CONTROL_ID                 ((uint32_t)0x131)
+#define CAN_MSG_PARK_CONTROL_ID                 ((uint32_t)0x131)
 //#define CAN_MSG_CONFIG_STATE_ID                 ((uint32_t)0x441)
 //#define CAN_MSG_CONFIG_ZERO_STEERING_ID         ((uint32_t)0x431)
 //#define CAN_MSG_CONFIG_ZERO_STEERING_STATUS_ID  ((uint32_t)0x43A)
@@ -164,7 +164,7 @@ typedef struct {
             uint8_t reserved5;
             uint8_t reserved6;
         } cmd;
-        uint8_t raw[8];
+        uint8_t raw[1];
     } data;
 } ModSelectMessage;
 
@@ -186,7 +186,7 @@ typedef struct {
                 uint8_t high_byte;
                 uint8_t low_byte;
             } fault_code;
-            uint8_t pack_mode;
+            uint8_t park_mode;
             uint8_t count;
         } status;
         uint8_t raw[8];
@@ -212,10 +212,10 @@ typedef struct {
             } current;
             struct
             {
-                int8_t heighest;
-                int8_t sec_heighest;
-                int8_t sec_lowest;
-                int8_t lowest;
+                uint8_t heighest;
+                uint8_t sec_heighest;
+                uint8_t sec_lowest;
+                uint8_t lowest;
             } moter_pose;
         } status;
         uint8_t raw[8];
@@ -261,10 +261,10 @@ typedef struct {
            uint8_t reserved5;
            uint8_t reserved6;
         } cmd;
-        uint8_t raw[8];
+        uint8_t raw[1];
 
     } data;
-} PackControlMessage;
+} ParkControlMessage;
 
 /* // System Configuration
 //typedef struct {
@@ -343,7 +343,7 @@ typedef enum
       //HunterConfigStatusMsg = 0x05,
     // control messages
     HunterMotionControlMsg = 0x21,
-    HunterPackControlMsg = 0x22,
+    HunterParkControlMsg = 0x22,
     HunterControlModeMsg = 0x23
 } HunterMsgType;
 
@@ -360,7 +360,7 @@ typedef struct
           //MotorDriverStatusMessage motor_driver_status_msg;
         // control messages
         MotionControlMessage motion_control_msg;
-        PackControlMessage pack_control_msg;
+        ParkControlMessage park_control_msg;
         ModSelectMessage mode_cmd_msg;
             //MotionCmdMessage motion_cmd_msg;
             //ConfigCmdMessage config_cmd_msg;
