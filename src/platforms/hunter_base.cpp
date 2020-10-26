@@ -17,8 +17,8 @@ namespace westonrobot {
 void HunterBase::SendRobotCmd() {
   static uint8_t cmd_count = 0;
   SendModeCtl();
-  bool flag = current_motion_cmd_.linear_velocity_height_byte || current_motion_cmd_.linear_velocity_low_byte;
-  SetPackMode(flag);
+  bool flag = true;//
+  SetParkMode();
   SendMotionCmd(cmd_count++);
 }
 
@@ -26,12 +26,10 @@ void HunterBase::SendMotionCmd(uint8_t count) {
   // motion control message
   HunterMessage m_msg;
   m_msg.type = HunterMotionControlMsg;
-
   /*if (can_connected_)
     m_msg.body.motion_control_msg.data.cmd.control_mode = CTRL_MODE_CMD_CAN;
   else if (serial_connected_)
     m_msg.body.motion_cmd_msg.data.cmd.control_mode = CTRL_MODE_CMD_UART*/;
-
   motion_cmd_mutex_.lock();
   m_msg.body.motion_control_msg.data.cmd.linear_velocity_cmd.high_byte =
       current_motion_cmd_.linear_velocity_height_byte;
@@ -41,25 +39,13 @@ void HunterBase::SendMotionCmd(uint8_t count) {
       current_motion_cmd_.angular_velocity_height_byte;
   m_msg.body.motion_control_msg.data.cmd.angular_velocity_cmd.low_byte =
       current_motion_cmd_.angular_velocity_low_byte;
-//  m_msg.body.motion_cmd_msg.data.cmd.fault_clear_flag =
-//      static_cast<uint8_t>(current_motion_cmd_.fault_clear_flag);
-//  m_msg.body.motion_cmd_msg.data.cmd.linear_velocity_cmd =
-//      current_motion_cmd_.linear_velocity;
-//  m_msg.body.motion_cmd_msg.data.cmd.angular_velocity_cmd =
-//      current_motion_cmd_.angular_velocity;
   motion_cmd_mutex_.unlock();
 
   m_msg.body.motion_control_msg.data.cmd.reserved0 = 0;
   m_msg.body.motion_control_msg.data.cmd.reserved1 = 0;
   m_msg.body.motion_control_msg.data.cmd.reserved2 = 0;
   m_msg.body.motion_control_msg.data.cmd.reserved3 = 0;
-//  m_msg.body.motion_cmd_msg.data.cmd.reserved0 = 0;
-//  m_msg.body.motion_cmd_msg.data.cmd.reserved1 = 0;
-//  m_msg.body.motion_cmd_msg.data.cmd.count = count;
 
-//  if (can_connected_)
-//    m_msg.body.motion_cmd_msg.data.cmd.checksum = CalcHunterCANChecksum(
-//        CAN_MSG_MOTION_CMD_ID, m_msg.body.motion_cmd_msg.data.raw, 8);
 
   // send to can bus
   if (can_connected_) {
@@ -95,13 +81,6 @@ void HunterBase::SetMotionCommand(
   current_motion_cmd_.angular_velocity_height_byte = static_cast<int16_t>(angular_vel*1000)>>8;
   current_motion_cmd_.angular_velocity_low_byte = static_cast<int16_t>(angular_vel*1000)&0xff;
   current_motion_cmd_.fault_clear_flag = fault_clr_flag;
-  //std::cout <<"linear_vel:"<<linear_vel<<std::endl;
-  //std::cout <<"angular_vel:"<<angular_vel<<std::endl;
-//  current_motion_cmd_.linear_velocity = static_cast<int8_t>(
-//      linear_vel / HunterMotionCmd::max_linear_velocity * 100.0);
-//  current_motion_cmd_.angular_velocity = static_cast<int8_t>(
-//      steering_angle / HunterMotionCmd::max_steering_angle * 100.0);
-//  current_motion_cmd_.fault_clear_flag = fault_clr_flag;
 
   FeedCmdTimeoutWatchdog();
 }
@@ -127,9 +106,11 @@ void HunterBase::SendModeCtl(){
   }else {}
 }
 
-void HunterBase::SetPackMode(bool flag){
+void HunterBase::SetParkMode(){
   HunterMessage m_msg;
   m_msg.type = HunterParkControlMsg;
+  bool flag = current_motion_cmd_.linear_velocity_height_byte ||
+              current_motion_cmd_.linear_velocity_low_byte;
   if(flag)
   {
     pack_mode_cmd_mutex_.lock();
@@ -205,7 +186,7 @@ void HunterBase::UpdateHunterState(const HunterMessage &status_msg,
       break;
     }
     case HunterMotorDriverHeightSpeedStatusMsg: {
-      // std::cout << "motor 1 driver feedback received" << std::endl;
+      // std::cout << "motor driver height speed feedback received" << std::endl;
       const MotorDriverHeightSpeedStatusMessage &msg =
           status_msg.body.motor_driver_height_speed_status_msg;
       for (int i = 0; i < HunterState::motor_num; ++i) {
@@ -227,7 +208,7 @@ void HunterBase::UpdateHunterState(const HunterMessage &status_msg,
       break;
     }
     case HunterMotorDriverLowSpeedStatusMsg: {
-      // std::cout << "motor 1 driver feedback received" << std::endl;
+      // std::cout << "motor driver low speed feedback received" << std::endl;
       const MotorDriverLowSpeedStatusMessage &msg =
           status_msg.body.motor_driver_low_speed_status_msg;
       for (int i = 0; i < HunterState::motor_num; ++i) {
@@ -245,19 +226,6 @@ void HunterBase::UpdateHunterState(const HunterMessage &status_msg,
            = msg.data.status.driver_status;
       }
     }
-//    case HunterControlModeMsg:{
-//      const ModSelectMessage &msg = status_msg.body.mode_cmd_msg;
-//      state.control_mode2 = msg.data.cmd.mode_control;
-//    }
-//    case HunterParkControlMsg:{
-//      const ParkControlMessage &msg = status_msg.body.park_control_msg;
-//      state.park_mode2 = msg.data.cmd.packing_mode;
-//    }
-//    case HunterConfigStatusMsg: {
-//      const ConfigStatusMessage &msg = status_msg.body.config_status_msg;
-//      state.set_zero_steering = msg.data.status.set_zero_steering;
-//      break;
-//    }
     default:
       break;
   }

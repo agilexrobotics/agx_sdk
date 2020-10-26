@@ -53,7 +53,7 @@ class HunterBase : public MobileBase {
 
   void SendMotionCmd(uint8_t count);
   void SendModeCtl();
-  void SetPackMode(bool flag);
+  void SetParkMode();
   void NewStatusMsgReceivedCallback(const HunterMessage &msg);
 
  public:

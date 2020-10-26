@@ -25,14 +25,6 @@ extern "C" {
 #define HUNTER_MOTOR3_ID                 ((uint8_t)0x02)
 
 // CAN Definitions
-//#define CAN_MSG_MOTION_CMD_ID            ((uint32_t)0x130)
-//#define CAN_MSG_MOTION_STATUS_ID         ((uint32_t)0x131)
-//#define CAN_MSG_CONFIG_CMD_ID            ((uint32_t)0x210)
-//#define CAN_MSG_CONFIG_STATUS_ID         ((uint32_t)0x211)
-//#define CAN_MSG_SYSTEM_STATUS_STATUS_ID  ((uint32_t)0x151)
-//#define CAN_MSG_MOTOR1_DRIVER_STATUS_ID  ((uint32_t)0x201)
-//#define CAN_MSG_MOTOR2_DRIVER_STATUS_ID  ((uint32_t)0x202)
-//#define CAN_MSG_MOTOR3_DRIVER_STATUS_ID  ((uint32_t)0x203)
 #define CAN_MSG_MOTION_CONTROL_CMD_ID           ((uint32_t)0x111)
 #define CAN_MSG_MOTION_CONTROL_STATUS_ID        ((uint32_t)0x221)
 #define CAN_MSG_SELECT_CONTROL_MODE_ID          ((uint32_t)0x421)
@@ -44,10 +36,6 @@ extern "C" {
 #define CAN_MSG_MOTOR2_LOW_DRIVER_STATUS_ID     ((uint32_t)0x262)
 #define CAN_MSG_MOTOR3_LOW_DRIVER_STATUS_ID     ((uint32_t)0x263)
 #define CAN_MSG_PARK_CONTROL_ID                 ((uint32_t)0x131)
-//#define CAN_MSG_CONFIG_STATE_ID                 ((uint32_t)0x441)
-//#define CAN_MSG_CONFIG_ZERO_STEERING_ID         ((uint32_t)0x431)
-//#define CAN_MSG_CONFIG_ZERO_STEERING_STATUS_ID  ((uint32_t)0x43A)
-
 
 /*--------------------- Control/State Constants ------------------------*/
 
@@ -101,31 +89,7 @@ extern "C" {
 
 // Note: id could be different for UART and CAN protocol
 
-// Motion Control
-typedef struct {
-    union
-    {
-        struct
-        {
-            struct
-            {
-                uint8_t high_byte;
-                uint8_t low_byte;
-            } linear_velocity_cmd;
-            uint8_t reserved0;
-            uint8_t reserved1;
-            uint8_t reserved2;
-            uint8_t reserved3;
-            struct
-            {
-                uint8_t high_byte;
-                uint8_t low_byte;
-            } angular_velocity_cmd;
-        } cmd;
-        uint8_t raw[8];
-    } data;
-} MotionControlMessage;
-
+// Motion Status Feedback
 typedef struct {
     union
     {
@@ -149,24 +113,6 @@ typedef struct {
         uint8_t raw[8];
     } data;
 } MotionStatusMessage;
-
-typedef struct {
-    union
-    {
-        struct
-        {
-            uint8_t mode_control;
-            uint8_t reserved0;
-            uint8_t reserved1;
-            uint8_t reserved2;
-            uint8_t reserved3;
-            uint8_t reserved4;
-            uint8_t reserved5;
-            uint8_t reserved6;
-        } cmd;
-        uint8_t raw[1];
-    } data;
-} ModSelectMessage;
 
 // System Status Feedback
 typedef struct {    
@@ -193,7 +139,7 @@ typedef struct {
     } data;
 } SystemStatusMessage;
 
-// Motor Driver Feedback
+// Motor Driver Height Speed Status Feedback
 typedef struct {
     uint8_t motor_id;
     union
@@ -222,6 +168,7 @@ typedef struct {
     } data;
 } MotorDriverHeightSpeedStatusMessage;
 
+// Motor Driver Low Speed Status Feedback
 typedef struct {
     uint8_t motor_id;
     union
@@ -247,6 +194,32 @@ typedef struct {
     } data;
 } MotorDriverLowSpeedStatusMessage;
 
+// Motion Control
+typedef struct {
+    union
+    {
+        struct
+        {
+            struct
+            {
+                uint8_t high_byte;
+                uint8_t low_byte;
+            } linear_velocity_cmd;
+            uint8_t reserved0;
+            uint8_t reserved1;
+            uint8_t reserved2;
+            uint8_t reserved3;
+            struct
+            {
+                uint8_t high_byte;
+                uint8_t low_byte;
+            } angular_velocity_cmd;
+        } cmd;
+        uint8_t raw[8];
+    } data;
+} MotionControlMessage;
+
+// Parking Mode Control
 typedef struct {
     union
     {
@@ -261,75 +234,30 @@ typedef struct {
            uint8_t reserved5;
            uint8_t reserved6;
         } cmd;
-        uint8_t raw[1];
+        uint8_t raw[8];
 
     } data;
 } ParkControlMessage;
 
-/* // System Configuration
-//typedef struct {
-//    union
-//    {
-//        struct
-//        {
-//            uint8_t set_zero_steering;
-//            uint8_t reserved0;
-//            uint8_t reserved1;
-//            uint8_t reserved2;
-//            uint8_t reserved3;
-//            uint8_t reserved4;
-//            uint8_t count;
-//            uint8_t checksum;
-//        } status;
-//        uint8_t raw[8];
-//    } data;
-//} ConfigCmdMessage;
+// Motion Mode Control
+typedef struct {
+    union
+    {
+        struct
+        {
+            uint8_t mode_control;
+            uint8_t reserved0;
+            uint8_t reserved1;
+            uint8_t reserved2;
+            uint8_t reserved3;
+            uint8_t reserved4;
+            uint8_t reserved5;
+            uint8_t reserved6;
+        } cmd;
+        uint8_t raw[8];
+    } data;
+} ModSelectMessage;
 
-// System Configuration Status Feedback
-//typedef struct {
-//    union
-//    {
-//        struct
-//        {
-//            uint8_t set_zero_steering;
-//            uint8_t reserved0;
-//            uint8_t reserved1;
-//            uint8_t reserved2;
-//            uint8_t reserved3;
-//            uint8_t reserved4;
-//            uint8_t count;
-//            uint8_t checksum;
-//        } status;
-//        uint8_t raw[8];
-//    } data;
-//} ConfigStatusMessage;
-
-// Motor Driver Feedback
-//typedef struct
-//{
-//    uint8_t motor_id;
-//    union {
-//        struct
-//        {
-//            struct
-//            {
-//                uint8_t high_byte;
-//                uint8_t low_byte;
-//            } current;
-//            struct
-//            {
-//                uint8_t high_byte;
-//                uint8_t low_byte;
-//            } rpm;
-//            int8_t temperature;
-//            uint8_t reserved0;
-//            uint8_t count;
-//            uint8_t checksum;
-//        } status;
-//        uint8_t raw[8];
-//    } data;
-//} MotorDriverStatusMessage2;
-*/
 // For convenience to access status/control message
 typedef enum
 {
@@ -337,10 +265,8 @@ typedef enum
     // status messages
     HunterMotionStatusMsg = 0x01,
     HunterSystemStatusMsg = 0x02,
-    HunterMotorDriverHeightSpeedStatusMsg = 0x04,
-    HunterMotorDriverLowSpeedStatusMsg = 0x05,
-      //HunterMotorDriverStatusMsg = 0x04,
-      //HunterConfigStatusMsg = 0x05,
+    HunterMotorDriverHeightSpeedStatusMsg = 0x03,
+    HunterMotorDriverLowSpeedStatusMsg = 0x04,
     // control messages
     HunterMotionControlMsg = 0x21,
     HunterParkControlMsg = 0x22,
@@ -356,14 +282,10 @@ typedef struct
         SystemStatusMessage system_status_msg;
         MotorDriverHeightSpeedStatusMessage motor_driver_height_speed_status_msg;
         MotorDriverLowSpeedStatusMessage motor_driver_low_speed_status_msg;
-          //ConfigStatusMessage config_status_msg;
-          //MotorDriverStatusMessage motor_driver_status_msg;
         // control messages
         MotionControlMessage motion_control_msg;
         ParkControlMessage park_control_msg;
         ModSelectMessage mode_cmd_msg;
-            //MotionCmdMessage motion_cmd_msg;
-            //ConfigCmdMessage config_cmd_msg;
     } body;
 } HunterMessage;
 

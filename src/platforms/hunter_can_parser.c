@@ -33,12 +33,6 @@ bool DecodeHunterMsgFromCAN(const struct can_frame *rx_frame, HunterMessage *msg
         memcpy(msg->body.system_status_msg.data.raw, rx_frame->data, rx_frame->can_dlc * sizeof(uint8_t));
         break;
     }
-//    case CAN_MSG_CONFIG_STATUS_ID:
-//    {
-//        msg->type = HunterSystemStatusMsg;
-//        memcpy(msg->body.config_status_msg.data.raw, rx_frame->data, rx_frame->can_dlc * sizeof(uint8_t));
-//        break;
-//    }
     case CAN_MSG_MOTOR1_HEIGHT_DRIVER_STATUS_ID:
     {
         msg->type = HunterMotorDriverHeightSpeedStatusMsg;
@@ -99,19 +93,6 @@ bool DecodeHunterMsgFromCAN(const struct can_frame *rx_frame, HunterMessage *msg
          memcpy(msg->body.mode_cmd_msg.data.raw, rx_frame->data, rx_frame->can_dlc * sizeof(uint8_t));
          break;
     }
-    // in the current implementation, both MsgType and can_frame include 8 * uint8_t
-//    case CAN_MSG_MOTION_CMD_ID:
-//    {
-//        msg->type = HunterMotionCmdMsg;
-//        memcpy(msg->body.motion_cmd_msg.data.raw, rx_frame->data, rx_frame->can_dlc * sizeof(uint8_t));
-//        break;
-//    }
-//    case CAN_MSG_CONFIG_CMD_ID:
-//    {
-//        msg->type = HunterConfigCmdMsg;
-//        memcpy(msg->body.config_status_msg.data.raw, rx_frame->data, rx_frame->can_dlc * sizeof(uint8_t));
-//        break;
-//    }
     default:
         break;
     }
@@ -154,25 +135,9 @@ void EncodeHunterMsgToCAN(const HunterMessage *msg, struct can_frame *tx_frame)
 
         break;
     }
-//    case HunterMotorDriverStatusMsg:
-//    {
-//        if (msg->body.motor_driver_status_msg.motor_id == HUNTER_MOTOR1_ID)
-//            tx_frame->can_id = CAN_MSG_MOTOR1_DRIVER_STATUS_ID;
-//        else if (msg->body.motor_driver_status_msg.motor_id == HUNTER_MOTOR2_ID)
-//            tx_frame->can_id = CAN_MSG_MOTOR2_DRIVER_STATUS_ID;
-//        else if (msg->body.motor_driver_status_msg.motor_id == HUNTER_MOTOR3_ID)
-//            tx_frame->can_id = CAN_MSG_MOTOR3_DRIVER_STATUS_ID;
-//        // else if (msg->body.motor_driver_status_msg.motor_id == HUNTER_MOTOR4_ID)
-//        //     tx_frame->can_id = CAN_MSG_MOTOR4_DRIVER_STATUS_ID;
-//        tx_frame->can_dlc = 8;
-//        memcpy(tx_frame->data, msg->body.motor_driver_status_msg.data.raw, tx_frame->can_dlc);
-//        break;
-//    }
-
     default:
         break;
     }
-    //tx_frame->data[7] = CalcHunterCANChecksum(tx_frame->can_id, tx_frame->data, tx_frame->can_dlc);
 }
 
 void EncodeHunterMotionControlMsgToCAN(const MotionControlMessage *msg, struct can_frame *tx_frame)
@@ -180,19 +145,17 @@ void EncodeHunterMotionControlMsgToCAN(const MotionControlMessage *msg, struct c
     tx_frame->can_id = CAN_MSG_MOTION_CONTROL_CMD_ID;
     tx_frame->can_dlc = 8;
     memcpy(tx_frame->data, msg->data.raw, tx_frame->can_dlc);
-    //std::cout << "Warning: cmd timeout, old cmd not sent to robot" << std::endl;
-    //tx_frame->data[7] = CalcHunterCANChecksum(tx_frame->can_id, tx_frame->data, tx_frame->can_dlc);
 }
 void EncodeHunterControlModeMsgToCAN(const ModSelectMessage *msg,struct can_frame *tx_frame)
 {
     tx_frame->can_id = CAN_MSG_SELECT_CONTROL_MODE_ID;
-    tx_frame->can_dlc = 1;
+    tx_frame->can_dlc = 8;
     memcpy(tx_frame->data, msg->data.raw, tx_frame->can_dlc);
 }
 void EncodeHunterControlParkMsgToCAN(const ParkControlMessage *msg,struct can_frame *tx_frame)
 {
     tx_frame->can_id = CAN_MSG_PARK_CONTROL_ID;
-    tx_frame->can_dlc = 1;
+    tx_frame->can_dlc = 8;
     memcpy(tx_frame->data, msg->data.raw, tx_frame->can_dlc);
 }
 

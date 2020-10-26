@@ -81,7 +81,6 @@ void MobileBase::ControlLoop(int32_t period_ms) {
       if (watchdog_counter_ < timeout_iter_num) {
         SendRobotCmd();
         ++watchdog_counter_;
-        //watchdog_counter_=timeout_iter_num;
       } else {
         std::cout << "Warning: cmd timeout, old cmd not sent to robot" << std::endl;
       }
