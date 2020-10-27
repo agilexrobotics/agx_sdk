@@ -17,7 +17,6 @@ namespace westonrobot {
 void HunterBase::SendRobotCmd() {
   static uint8_t cmd_count = 0;
   SendModeCtl();
-  bool flag = true;//
   SetParkMode();
   SendMotionCmd(cmd_count++);
 }
