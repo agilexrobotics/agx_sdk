@@ -12,7 +12,7 @@
 #include "string.h"
 
 static void EncodeTracerMotionControlMsgToCAN(const MotionCmdMessage *msg, struct can_frame *tx_frame);
-static void EncodeTracerModeControlMsgToCAN(const MotionCmdMessage *msg, struct can_frame *tx_frame);
+static void EncodeTracerModeControlMsgToCAN(const ModSelectMessage *msg, struct can_frame *tx_frame);
 
 bool DecodeTracerMsgFromCAN(const struct can_frame *rx_frame, TracerMessage *msg)
 {
@@ -107,7 +107,7 @@ void EncodeTracerMsgToCAN(const TracerMessage *msg, struct can_frame *tx_frame)
     }
     case TracerModeControlMsg:
     {
-        EncodeTracerModeControlMsgToCAN(&(msg->body.odom_msg), tx_frame);
+        EncodeTracerModeControlMsgToCAN(&(msg->body.mode_cmd_msg), tx_frame);
         break;
     }
     default:
@@ -123,7 +123,7 @@ void EncodeTracerMotionControlMsgToCAN(const MotionCmdMessage *msg, struct can_f
     memcpy(tx_frame->data, msg->data.raw, tx_frame->can_dlc);
     //tx_frame->data[7] = CalcTracerCANChecksum(tx_frame->can_id, tx_frame->data, tx_frame->can_dlc);
 }
-void EncodeTracerModeControlMsgToCAN(const MotionCmdMessage *msg, struct can_frame *tx_frame)
+void EncodeTracerModeControlMsgToCAN(const ModSelectMessage *msg, struct can_frame *tx_frame)
 {
     tx_frame->can_id = CAN_MSG_COMTROL_MODE_ID;
     tx_frame->can_dlc = 8;

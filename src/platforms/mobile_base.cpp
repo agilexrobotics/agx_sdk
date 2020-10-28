@@ -59,28 +59,35 @@ void MobileBase::ConfigureSerial(const std::string uart_name,
 }
 
 void MobileBase::StartCmdThread() {
+  //std::cout<<"StartCmdThread_in:"<<std::endl;
   cmd_thread_ = std::thread(
       std::bind(&MobileBase::ControlLoop, this, cmd_thread_period_ms_));
+  //cmd_thread_.join();
   cmd_thread_started_ = true;
+  //std::cout<<"StartCmdThread_out:"<<std::endl;
 }
 
 void MobileBase::ControlLoop(int32_t period_ms) {
+  //std::cout<<"son_in:"<<std::endl;
   StopWatch ctrl_sw;
   bool print_loop_freq = false;
   uint32_t timeout_iter_num;
-
+  //std::cout<<"son_in1:"<<std::endl;
   if (enable_timeout_) {
     if (timeout_ms_ < period_ms) timeout_ms_ = period_ms;
     timeout_iter_num = static_cast<uint32_t>(timeout_ms_ / period_ms);
     std::cout << "Timeout iteration number: " << timeout_iter_num << std::endl;
   }
-
+  //std::cout<<"son_in2:"<<std::endl;
   while (true) {
+   // std::cout<<"son:"<<std::endl;
     ctrl_sw.tic();
+
     if (enable_timeout_) {
       if (watchdog_counter_ < timeout_iter_num) {
         SendRobotCmd();
         ++watchdog_counter_;
+        //watchdog_counter_=timeout_iter_num;
       } else {
         std::cout << "Warning: cmd timeout, old cmd not sent to robot" << std::endl;
       }

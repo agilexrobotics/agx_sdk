@@ -17,9 +17,10 @@ namespace westonrobot
 void TracerBase::SendRobotCmd() {
   static uint8_t cmd_count = 0;
   static uint8_t light_cmd_count = 0;
-  SendMotionCmd(cmd_count++);
   SendControlCmd();
-  if (light_ctrl_requested_) SendLightCmd(light_cmd_count++);
+  SendMotionCmd(cmd_count++);
+
+  //if (light_ctrl_requested_) SendLightCmd(light_cmd_count++);
 }
 
 
@@ -28,7 +29,8 @@ void TracerBase::SendMotionCmd(uint8_t count)
     // motion control message
     TracerMessage m_msg;
     m_msg.type = TracerMotionCmdMsg;
-    SendControlCmd();
+
+    //SendControlCmd();
     motion_cmd_mutex_.lock();
     m_msg.body.motion_cmd_msg.data.cmd.linear_velocity.H_byte = current_motion_cmd_.linear_velocity_H;
     m_msg.body.motion_cmd_msg.data.cmd.linear_velocity.L_byte = current_motion_cmd_.linear_velocity_L;
@@ -62,6 +64,7 @@ void TracerBase::SendMotionCmd(uint8_t count)
         // EncodeTracerMsgToUART(&m_msg, tx_buffer_, &tx_cmd_len_);
         // serial_if_->send_bytes(tx_buffer_, tx_cmd_len_);
     }
+
 }
 
 void TracerBase::SendLightCmd(uint8_t count)
@@ -157,6 +160,7 @@ void TracerBase::SendControlCmd()
           // EncodeTracerMsgToUART(&m_msg, tx_buffer_, &tx_cmd_len_);
           // serial_if_->send_bytes(tx_buffer_, tx_cmd_len_);
       }
+
 }
 
 
@@ -170,9 +174,9 @@ TracerState TracerBase::GetTracerState()
 void TracerBase::SetMotionCommand(double linear_vel, double angular_vel, TracerMotionCmd::FaultClearFlag fault_clr_flag)
 {
     // make sure cmd thread is started before attempting to send commands
-    if (!cmd_thread_started_)
-        StartCmdThread();
-
+    //std::cout<<"StartCmdThread:"<<std::endl;
+    if (!cmd_thread_started_) StartCmdThread();
+    //std::cout<<"StartCmdThread1:"<<std::endl;
     if (linear_vel < TracerMotionCmd::min_linear_velocity)
         linear_vel = TracerMotionCmd::min_linear_velocity;
     if (linear_vel > TracerMotionCmd::max_linear_velocity)
@@ -189,6 +193,8 @@ void TracerBase::SetMotionCommand(double linear_vel, double angular_vel, TracerM
     current_motion_cmd_.angular_velocity_H = static_cast<int16_t>(angular_vel*1000)>>8;
     current_motion_cmd_.angular_velocity_L = static_cast<int16_t>(angular_vel*1000)&0xff;
     current_motion_cmd_.fault_clear_flag = fault_clr_flag;
+    //std::cout<<"linear_vel:"<<linear_vel<<std::endl;
+    FeedCmdTimeoutWatchdog();
 
 }
 
@@ -201,6 +207,7 @@ void TracerBase::SetLightCommand(TracerLightCmd cmd)
     current_light_cmd_ = cmd;
     light_ctrl_enabled_ = true;
     light_ctrl_requested_ = true;
+    FeedCmdTimeoutWatchdog();
 }
 
 void TracerBase::DisableLightCmdControl()
