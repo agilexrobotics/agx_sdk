@@ -11,7 +11,6 @@ mark_as_advanced(
 
 # add unit tests
 set(GRAPH_TESTS
-    unit_tests/ringbuf_test.cpp
     unit_tests/scout_can_protocol_test.cpp
 )
 add_executable(gtest_all ${GRAPH_TESTS})

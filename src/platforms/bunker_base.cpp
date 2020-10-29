@@ -17,6 +17,7 @@ void BunkerBase::SendRobotCmd() {
   static uint8_t cmd_count = 0;
   static uint8_t light_cmd_count = 0;
   SendMotionCmd(cmd_count++);
+  if (light_ctrl_requested_) SendLightCmd(light_cmd_count++);
 }
 
 void BunkerBase::SendMotionCmd(uint8_t count) {
@@ -53,15 +54,83 @@ void BunkerBase::SendMotionCmd(uint8_t count) {
     // send to can bus
     can_frame m_frame;
     EncodeBunkerMsgToCAN(&m_msg, &m_frame);
-    can_if_->SendFrame(m_frame);
+    can_if_->send_frame(m_frame);
   } else {
     // send to serial port
-//    EncodeBunkerMsgToUART(&m_msg, tx_buffer_, &tx_cmd_len_);
-//    serial_if_->SendBytes(tx_buffer_, tx_cmd_len_);
+    EncodeBunkerMsgToUART(&m_msg, tx_buffer_, &tx_cmd_len_);
+    serial_if_->send_bytes(tx_buffer_, tx_cmd_len_);
   }
 }
 
+void BunkerBase::SendLightCmd(uint8_t count) {
+  BunkerMessage l_msg;
+  l_msg.type = BunkerLightControlMsg;
 
+  light_cmd_mutex_.lock();
+  if (light_ctrl_enabled_) {
+    l_msg.body.light_control_msg.data.cmd.light_ctrl_enable = LIGHT_ENABLE_CTRL;
+
+    l_msg.body.light_control_msg.data.cmd.front_light_mode =
+        static_cast<uint8_t>(current_light_cmd_.front_mode);
+    l_msg.body.light_control_msg.data.cmd.front_light_custom =
+        current_light_cmd_.front_custom_value;
+    l_msg.body.light_control_msg.data.cmd.rear_light_mode =
+        static_cast<uint8_t>(current_light_cmd_.rear_mode);
+    l_msg.body.light_control_msg.data.cmd.rear_light_custom =
+        current_light_cmd_.rear_custom_value;
+
+    // std::cout << "cmd: " << l_msg.data.cmd.front_light_mode << " , " <<
+    // l_msg.data.cmd.front_light_custom << " , "
+    //           << l_msg.data.cmd.rear_light_mode << " , " <<
+    //           l_msg.data.cmd.rear_light_custom << std::endl;
+    // std::cout << "light cmd generated" << std::endl;
+  } else {
+    l_msg.body.light_control_msg.data.cmd.light_ctrl_enable =
+        LIGHT_DISABLE_CTRL;
+
+    l_msg.body.light_control_msg.data.cmd.front_light_mode =
+        LIGHT_MODE_CONST_OFF;
+    l_msg.body.light_control_msg.data.cmd.front_light_custom = 0;
+    l_msg.body.light_control_msg.data.cmd.rear_light_mode =
+        LIGHT_MODE_CONST_OFF;
+    l_msg.body.light_control_msg.data.cmd.rear_light_custom = 0;
+  }
+  light_ctrl_requested_ = false;
+  light_cmd_mutex_.unlock();
+
+  l_msg.body.light_control_msg.data.cmd.reserved0 = 0;
+  l_msg.body.light_control_msg.data.cmd.count = count;
+
+  if (can_connected_)
+    l_msg.body.light_control_msg.data.cmd.checksum = CalcBunkerCANChecksum(
+        CAN_MSG_LIGHT_CONTROL_CMD_ID, l_msg.body.light_control_msg.data.raw, 8);
+  // serial_connected_: checksum will be calculated later when packed into a
+  // complete serial frame
+
+  if (can_connected_) {
+    // send to can bus
+    can_frame l_frame;
+    EncodeBunkerMsgToCAN(&l_msg, &l_frame);
+
+    can_if_->send_frame(l_frame);
+  } else {
+    // send to serial port
+    EncodeBunkerMsgToUART(&l_msg, tx_buffer_, &tx_cmd_len_);
+    serial_if_->send_bytes(tx_buffer_, tx_cmd_len_);
+  }
+
+  // std::cout << "cmd: " << static_cast<int>(l_msg.data.cmd.front_light_mode)
+  // << " , " << static_cast<int>(l_msg.data.cmd.front_light_custom) << " , "
+  //           << static_cast<int>(l_msg.data.cmd.rear_light_mode) << " , " <<
+  //           static_cast<int>(l_msg.data.cmd.rear_light_custom) << std::endl;
+  // std::cout << "can: ";
+  // for (int i = 0; i < 8; ++i)
+  //     std::cout << static_cast<int>(l_frame.data[i]) << " ";
+  // std::cout << "uart: ";
+  // for (int i = 0; i < tx_cmd_len_; ++i)
+  //     std::cout << static_cast<int>(tx_buffer_[i]) << " ";
+  // std::cout << std::endl;
+}
 
 BunkerState BunkerBase::GetBunkerState() {
   std::lock_guard<std::mutex> guard(bunker_state_mutex_);
@@ -89,10 +158,22 @@ void BunkerBase::SetMotionCommand(
   current_motion_cmd_.angular_velocity = static_cast<int8_t>(
       angular_vel / BunkerMotionCmd::max_angular_velocity * 100.0);
   current_motion_cmd_.fault_clear_flag = fault_clr_flag;
-  FeedCmdTimeoutWatchdog();
 }
 
+void BunkerBase::SetLightCommand(BunkerLightCmd cmd) {
+  if (!cmd_thread_started_) StartCmdThread();
 
+  std::lock_guard<std::mutex> guard(light_cmd_mutex_);
+  current_light_cmd_ = cmd;
+  light_ctrl_enabled_ = true;
+  light_ctrl_requested_ = true;
+}
+
+void BunkerBase::DisableLightCmdControl() {
+  std::lock_guard<std::mutex> guard(light_cmd_mutex_);
+  light_ctrl_enabled_ = false;
+  light_ctrl_requested_ = true;
+}
 
 void BunkerBase::ParseCANFrame(can_frame *rx_frame) {
   // validate checksum, discard frame if fails

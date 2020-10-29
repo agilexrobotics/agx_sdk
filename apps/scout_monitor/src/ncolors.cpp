@@ -54,8 +54,6 @@ short CursorColor(int fg)
         return (COLOR_YELLOW);
     case 7: /* 111 */
         return (COLOR_WHITE);
-    default:
-        return COLOR_BLACK;
     }
 }
 } // namespace

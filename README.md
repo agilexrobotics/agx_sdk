@@ -1,9 +1,9 @@
-# Agilex Robot Platform SDK
+# Weston Robot Platform SDK
 
 ![GitHub Workflow Status](https://github.com/westonrobot/wrp_sdk/workflows/Cpp/badge.svg)
 ![GitHub Workflow Status](https://github.com/westonrobot/wrp_sdk/workflows/ROS/badge.svg)
 
-Copyright (c) 2020 [AgilexRobot](http://www.agilex.ai/)
+Copyright (c) 2020 [WestonRobot](https://www.agilex.ai/)
 
 ## Introduction
 
@@ -11,11 +11,11 @@ Supported platforms
 
 * **Scout**: skid-steer mobile base
 * **Hunter**: ackermann mobile base
-* **Bunker**: caterpillar mobile base
+* **Bunker**: Caterpillar mobile base
 * **Tracer**: skid-steer mobile base
-* **Scout-mini**: skid-steer mobile base
+* **Scou_mini**: skid-steer mobile base
 
-This software packages provides a C++ interface to communicate with the mobile platforms from Agilex Robot, for sending commands to the robot and acquiring the latest robot state. The SDK works on both x86 and ARM platforms.
+This software packages provides a C++ interface to communicate with the mobile platforms from Weston Robot, for sending commands to the robot and acquiring the latest robot state. The SDK works on both x86 and ARM platforms.
 
 Generally, you only need to instantiate an object of the robot base class (such as ScoutBase), then use the object to programmatically control the robot. Internally, the base class manages two background threads, one to process CAN/UART messages of the robot state and accordingly update state variables in the robot state data structure, and the other to maintain a 50Hz loop and send the latest command to the robot base. User can iteratively perform tasks in the main thread and check the robot state or set control commands. 
 
@@ -74,46 +74,12 @@ $ sudo apt install libasio-dev
 
 ```
 $ cd <your-catkin-ws>/src
-$ git clone https://github.com/agilexrobotics/agx_sdk.git
+$ git clone https://github.com/agilexrobotics/wrp_sdk.git
 $ cd ..
 $ catkin_make
 ```
 
 ### II. Use the package without ROS
-You will need to upgrade CMake to a newer version in this case. Follow instructions on this page: https://apt.kitware.com/ 
-
-Here is a brief summary
-
-```
-$ sudo apt-get update
-$ sudo apt-get install apt-transport-https ca-certificates gnupg software-properties-common wget
-$ wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
-```
-
-Ubuntu 20.04 
-
-```
-$ sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ focal main'
-```
-
-Ubuntu 18.04 
-
-```
-$ sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
-```
-
-Ubuntu 16.04 
-
-```
-$ sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ xenial main'
-```
-
-```
-$ sudo apt-get update
-$ sudo apt-get install kitware-archive-keyring
-$ sudo rm /etc/apt/trusted.gpg.d/kitware.gpg
-$ sudo apt-get install cmake
-```
 
 If you want to build the TUI monitor tool, additionally install libncurses
 
@@ -124,7 +90,7 @@ $ sudo apt install libncurses5-dev
 Configure and build
 
 ```
-$ cd agx_sdk 
+$ cd wrp_sdk 
 $ mkdir build
 $ cd build
 $ cmake ..
@@ -132,7 +98,6 @@ $ make
 ```
 
 ## Run Demo Apps
-### Run Scout Demo
 
 The demo code expects one parameter for the CAN bus mode.
 
@@ -156,13 +121,6 @@ or
 
 ```
 $./app_scout_monitor /dev/ttyUSB0 115200
-```
-Both the port name and baud rate need to be provided when using the RS232 interface.
-### Run Hunter Demo
-The demo code expects one parameter for the CAN bus mode.
-
-```
-$ ./app_hunter_demo can0
 ```
 
 Note: the monitor app is not built by default if you use this SDK with ROS.

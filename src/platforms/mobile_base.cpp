@@ -34,66 +34,40 @@ void MobileBase::Connect(std::string dev_name, int32_t baud_rate) {
 }
 
 void MobileBase::Disconnect() {
-  if (can_connected_) can_if_->StopService();
-  if (serial_connected_ && serial_if_->IsOpened()) {
-    serial_if_->StopService();
+  if (serial_connected_ && serial_if_->is_open()) {
+    serial_if_->close();
   }
 }
 
 void MobileBase::ConfigureCAN(const std::string &can_if_name) {
-  can_if_ = std::make_shared<AsyncCAN>(can_if_name);
-  can_if_->SetReceiveCallback(
+  can_if_ = std::make_shared<ASyncCAN>(can_if_name);
+  can_if_->set_receive_callback(
       std::bind(&MobileBase::ParseCANFrame, this, std::placeholders::_1));
-  can_if_->StartListening();
   can_connected_ = true;
 }
 
 void MobileBase::ConfigureSerial(const std::string uart_name,
                                  int32_t baud_rate) {
-  serial_if_ = std::make_shared<AsyncSerial>(uart_name, baud_rate);
-  serial_if_->SetReceiveCallback(
+  serial_if_ = std::make_shared<ASyncSerial>(uart_name, baud_rate);
+  serial_if_->open();
+  if (serial_if_->is_open()) serial_connected_ = true;
+  serial_if_->set_receive_callback(
       std::bind(&MobileBase::ParseUARTBuffer, this, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3));
-  serial_if_->StartListening();
-  if (serial_if_->IsOpened()) serial_connected_ = true;
 }
 
 void MobileBase::StartCmdThread() {
-  //std::cout<<"StartCmdThread_in:"<<std::endl;
   cmd_thread_ = std::thread(
       std::bind(&MobileBase::ControlLoop, this, cmd_thread_period_ms_));
-  //cmd_thread_.join();
   cmd_thread_started_ = true;
-  //std::cout<<"StartCmdThread_out:"<<std::endl;
 }
 
 void MobileBase::ControlLoop(int32_t period_ms) {
-  //std::cout<<"son_in:"<<std::endl;
   StopWatch ctrl_sw;
   bool print_loop_freq = false;
-  uint32_t timeout_iter_num;
-  //std::cout<<"son_in1:"<<std::endl;
-  if (enable_timeout_) {
-    if (timeout_ms_ < period_ms) timeout_ms_ = period_ms;
-    timeout_iter_num = static_cast<uint32_t>(timeout_ms_ / period_ms);
-    std::cout << "Timeout iteration number: " << timeout_iter_num << std::endl;
-  }
-  //std::cout<<"son_in2:"<<std::endl;
   while (true) {
-   // std::cout<<"son:"<<std::endl;
     ctrl_sw.tic();
-
-    if (enable_timeout_) {
-      if (watchdog_counter_ < timeout_iter_num) {
-        SendRobotCmd();
-        ++watchdog_counter_;
-        //watchdog_counter_=timeout_iter_num;
-      } else {
-        std::cout << "Warning: cmd timeout, old cmd not sent to robot" << std::endl;
-      }
-    } else {
-      SendRobotCmd();
-    }
+    SendRobotCmd();
     ctrl_sw.sleep_until_ms(period_ms);
     if (print_loop_freq)
       std::cout << "control loop frequency: " << 1.0 / ctrl_sw.toc()

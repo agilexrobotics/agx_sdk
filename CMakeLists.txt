@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.10.2)
-project(wrp_sdk VERSION 0.1.5)
 
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
@@ -7,11 +6,10 @@ if(CCACHE_PROGRAM)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
 endif()
 
+project(wrp_sdk VERSION 0.1.5)
+
 ## Project Options
 option(BUILD_TESTS ON)
-option(STATIC_CHECK OFF)
-# set(CMAKE_BUILD_TYPE Release)
-# set(CMAKE_BUILD_TYPE Debug)
 
 ## Check if pkg is built with ROS catkin
 if(CATKIN_DEVEL_PREFIX)
@@ -26,14 +24,6 @@ endif()
 ## Generate symbols for IDE indexer
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-if(STATIC_CHECK)
-    find_program(CPPCHECK cppcheck)
-    if(CPPCHECK)
-        message(STATUS "Found cppcheck")
-        set(CMAKE_CXX_CPPCHECK cppcheck;--std=c++11;--enable=all)
-    endif() 
-endif()
-
 ## Additional cmake module path
 set(USER_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 list(APPEND CMAKE_MODULE_PATH "${USER_CMAKE_PATH}/modules")
@@ -46,6 +36,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 ## Chosse build type
+# set(CMAKE_BUILD_TYPE Release)
+# set(CMAKE_BUILD_TYPE Debug)
+
 set(default_build_type "Release")
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to '${default_build_type}' as none was specified.")
@@ -70,12 +63,10 @@ endif()
 # Build libraries
 find_package(Threads REQUIRED)
 
-# import asio library
-add_subdirectory(asio)
-
 add_library(${PROJECT_NAME} 
-    src/asyncio/async_serial.cpp
-    src/asyncio/async_can.cpp
+    src/async_serial.cpp
+    src/async_can.cpp
+    src/asyncio_utils.cpp
     # agilex mobile platforms
     src/platforms/mobile_base.cpp
     src/platforms/hunter_base.cpp
@@ -89,7 +80,8 @@ add_library(${PROJECT_NAME}
     src/platforms/bunker_can_parser.c
     src/platforms/bunker_uart_parser.c
 )
-target_link_libraries(${PROJECT_NAME} asio Threads::Threads)
+target_compile_definitions(${PROJECT_NAME} PUBLIC "-DASIO_ENABLE_OLD_SERVICES -DASIO_HAS_POSIX_STREAM_DESCRIPTOR")
+target_link_libraries(${PROJECT_NAME} Threads::Threads)
 target_include_directories(${PROJECT_NAME} PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 	$<INSTALL_INTERFACE:include>
@@ -143,17 +135,14 @@ if(BUILD_WITHOUT_ROS) # BUILD_WITHOUT_ROS
     endforeach()
 
     # targets to install
-    install(TARGETS ${PROJECT_NAME} asio
+    install(TARGETS ${PROJECT_NAME}
         EXPORT wrp_sdkTargets
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
         RUNTIME DESTINATION bin
         INCLUDES DESTINATION include)
 
-    install(DIRECTORY include/wrp_sdk asio/include/asio
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-
-    install(FILES asio/include/asio.hpp
+    install(DIRECTORY include/wrp_sdk
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
     # export target configuration 
@@ -186,17 +175,21 @@ if(BUILD_WITHOUT_ROS) # BUILD_WITHOUT_ROS
     set(CPACK_GENERATOR "DEB")
     set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
     set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Ruixiang Du (ruixiang.du@westonrobot.com)") 
-    # set(CPACK_DEBIAN_PACKAGE_DEPENDS "libasio-dev")
-    set(CPACK_SOURCE_IGNORE_FILES .git dist .*build.* /\\\\.DS_Store)
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libasio-dev")
+    set(CPACK_SOURCE_IGNORE_FILES
+        /.git
+        /dist
+        /.*build.*
+        /\\\\.DS_Store
+    )
     include(CPack)
 
 else() # BUILD_WITHOUT_ROS
 
     catkin_package(
         LIBRARIES ${PROJECT_NAME}
-        INCLUDE_DIRS include asio/include
-        #  CATKIN_DEPENDS rospy scout_msgs std_msgs
-        #  DEPENDS system_lib
+        INCLUDE_DIRS include
+        # DEPENDS rt pthread
     )
 
     ## Add catkin install targets
@@ -205,11 +198,8 @@ else() # BUILD_WITHOUT_ROS
       LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
       ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 
-    install(DIRECTORY include/${PROJECT_NAME} asio/include/asio
-      DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
-
-    install(FILES asio/include/asio.hpp
-      DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
+    install(DIRECTORY include/${PROJECT_NAME}/
+      DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
     install(DIRECTORY scripts
       DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
