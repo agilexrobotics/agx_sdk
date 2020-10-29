@@ -74,7 +74,7 @@ $ sudo apt install libasio-dev
 
 ```
 $ cd <your-catkin-ws>/src
-$ git clone https://github.com/agilexrobotics/wrp_sdk.git
+$ git clone https://github.com/agilexrobotics/agx_sdk.git
 $ cd ..
 $ catkin_make
 ```
