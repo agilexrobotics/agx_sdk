@@ -85,6 +85,7 @@ add_library(${PROJECT_NAME}
     src/platforms/scout_uart_parser.c
     src/platforms/tracer_base.cpp
     src/platforms/tracer_can_parser.c
+    src/platforms/tracer_uart_parser.c
     src/platforms/bunker_base.cpp
     src/platforms/bunker_can_parser.c
     src/platforms/bunker_uart_parser.c
@@ -92,7 +93,7 @@ add_library(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} asio Threads::Threads)
 target_include_directories(${PROJECT_NAME} PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-	$<INSTALL_INTERFACE:include>
+        $<INSTALL_INTERFACE:include>
     PRIVATE src)
     
 # Build apps
