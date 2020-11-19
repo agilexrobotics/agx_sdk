@@ -71,7 +71,7 @@ void MobileBase::ControlLoop(int32_t period_ms) {
   if (enable_timeout_) {
     if (timeout_ms_ < period_ms) timeout_ms_ = period_ms;
     timeout_iter_num = static_cast<uint32_t>(timeout_ms_ / period_ms);
-    std::cout << "Timeout iteration number: " << timeout_iter_num << std::endl;
+    //std::cout << "Timeout iteration number: " << timeout_iter_num << std::endl;
   }
   while (true) {
     ctrl_sw.tic();
