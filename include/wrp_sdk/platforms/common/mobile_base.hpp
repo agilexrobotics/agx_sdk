@@ -37,6 +37,9 @@ class MobileBase {
   // disconnect from roboot, only valid for serial port
   void Disconnect();
 
+  // ask background thread to shutdown properly
+  void Terminate();
+
   // cmd thread runs at 100Hz (10ms) by default
   void SetCmdThreadPeriodMs(int32_t period_ms) {
     cmd_thread_period_ms_ = period_ms;

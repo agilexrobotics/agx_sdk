@@ -39,6 +39,10 @@ void MobileBase::Disconnect() {
   }
 }
 
+void MobileBase::Terminate() {
+  std::terminate();
+}
+
 void MobileBase::ConfigureCAN(const std::string &can_if_name) {
   can_if_ = std::make_shared<ASyncCAN>(can_if_name);
   can_if_->set_receive_callback(
