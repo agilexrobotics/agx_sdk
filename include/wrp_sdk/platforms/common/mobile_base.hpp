@@ -39,6 +39,9 @@ class MobileBase {
   // disconnect from roboot, only valid for serial port
   void Disconnect();
 
+  // ask background thread to shutdown properly
+  void Terminate();
+
   // cmd thread runs at 100Hz (10ms) by default
   void SetCmdThreadPeriodMs(int32_t period_ms) {
     cmd_thread_period_ms_ = period_ms;
@@ -48,6 +51,14 @@ class MobileBase {
   // communication interface
   bool can_connected_ = false;
   bool serial_connected_ = false;
+
+  enum CmdType
+   {
+       reset = -1,
+       run = 0,
+       stop = 1
+   };
+   CmdType cmd_type = reset;
 
   std::shared_ptr<AsyncCAN> can_if_;
   std::shared_ptr<AsyncSerial> serial_if_;
@@ -62,6 +73,7 @@ class MobileBase {
   std::thread cmd_thread_;
   int32_t cmd_thread_period_ms_ = 10;
   bool cmd_thread_started_ = false;
+  std::atomic<bool> keep_running_;
 
   // internal functions
   void ConfigureCAN(const std::string &can_if_name = "can0");

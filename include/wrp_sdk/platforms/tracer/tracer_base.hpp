@@ -45,8 +45,6 @@ public:
     void SetLightCommand(TracerLightCmd cmd);
     void DisableLightCmdControl();
 
-
-
 private:
 
     // CAN priority higher than serial if both connected
