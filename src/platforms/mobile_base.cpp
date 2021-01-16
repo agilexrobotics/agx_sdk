@@ -69,13 +69,32 @@ void MobileBase::StartCmdThread() {
 void MobileBase::ControlLoop(int32_t period_ms) {
   StopWatch ctrl_sw;
   bool print_loop_freq = false;
+  uint32_t timeout_iter_num;
+  if (enable_timeout_) {
+    if (timeout_ms_ < period_ms) timeout_ms_ = period_ms;
+    timeout_iter_num = static_cast<uint32_t>(timeout_ms_ / period_ms);
+    //std::cout << "Timeout iteration number: " << timeout_iter_num << std::endl;
+    std::cout << "Info: timeout iteration time: " << timeout_ms_ <<" ms " << std::endl;
+  }
   while (true) {
-    ctrl_sw.tic();
-    SendRobotCmd();
-    ctrl_sw.sleep_until_ms(period_ms);
-    if (print_loop_freq)
-      std::cout << "control loop frequency: " << 1.0 / ctrl_sw.toc()
-                << std::endl;
+        ctrl_sw.tic();
+
+        if (enable_timeout_) {
+          if (watchdog_counter_ < timeout_iter_num) {
+            SendRobotCmd();
+            ++watchdog_counter_;
+            cmd_type = run;
+          } else if (cmd_type == run) {
+            std::cout << "Warning: cmd timeout, old cmd not sent to robot" << std::endl;
+            cmd_type = stop;
+          }
+        } else {
+          SendRobotCmd();
+        }
+        ctrl_sw.sleep_until_ms(period_ms);
+        if (print_loop_freq)
+          std::cout << "control loop frequency: " << 1.0 / ctrl_sw.toc()
+                    << std::endl;
   }
 }
 }  // namespace westonrobot

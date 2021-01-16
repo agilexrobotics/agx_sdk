@@ -57,6 +57,7 @@ void ScoutBase::SendMotionCmd(uint8_t count) {
     EncodeScoutMsgToUART(&m_msg, tx_buffer_, &tx_cmd_len_);
     serial_if_->send_bytes(tx_buffer_, tx_cmd_len_);
   }
+  FeedCmdTimeoutWatchdog();
 }
 
 void ScoutBase::SendModeCtl(){

@@ -50,8 +50,22 @@ class MobileBase {
   bool can_connected_ = false;
   bool serial_connected_ = false;
 
+  enum CmdType
+     {
+         reset = -1,
+         run = 0,
+         stop = 1
+     };
+  CmdType cmd_type = reset;
+
   std::shared_ptr<ASyncCAN> can_if_;
   std::shared_ptr<ASyncSerial> serial_if_;
+
+  // timeout to be implemented in each vehicle
+  bool enable_timeout_ = true;
+  uint32_t timeout_ms_ = 500;
+  uint32_t watchdog_counter_ = 0;
+  void FeedCmdTimeoutWatchdog() { watchdog_counter_ = 0; };
 
   // command thread
   std::thread cmd_thread_;
