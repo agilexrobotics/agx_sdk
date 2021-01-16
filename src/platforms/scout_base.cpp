@@ -57,7 +57,7 @@ void ScoutBase::SendMotionCmd(uint8_t count) {
     EncodeScoutMsgToUART(&m_msg, tx_buffer_, &tx_cmd_len_);
     serial_if_->send_bytes(tx_buffer_, tx_cmd_len_);
   }
-  FeedCmdTimeoutWatchdog();
+  
 }
 
 void ScoutBase::SendModeCtl(){
@@ -181,6 +181,8 @@ void ScoutBase::SetMotionCommand(
   current_motion_cmd_.angular_velocity_height_byte = static_cast<int16_t>(angular_vel*1000)>>8;
   current_motion_cmd_.angular_velocity_low_byte = static_cast<int16_t>(angular_vel*1000)&0xff;
   current_motion_cmd_.fault_clear_flag = fault_clr_flag;
+  
+  FeedCmdTimeoutWatchdog();
 }
 
 void ScoutBase::SetLightCommand(ScoutLightCmd cmd) {
