@@ -69,16 +69,16 @@ void HunterBase::SetMotionCommand(
     linear_vel = HunterMotionCmd::min_linear_velocity;
   if (linear_vel > HunterMotionCmd::max_linear_velocity)
     linear_vel = HunterMotionCmd::max_linear_velocity;
-  if (steering_angle < HunterMotionCmd::min_steering_angle)
-    steering_angle = HunterMotionCmd::min_steering_angle;
-  if (steering_angle > HunterMotionCmd::max_steering_angle)
-    steering_angle = HunterMotionCmd::max_steering_angle;
+  // if (steering_angle < HunterMotionCmd::min_steering_angle)
+  //   steering_angle = HunterMotionCmd::min_steering_angle;
+  // if (steering_angle > HunterMotionCmd::max_steering_angle)
+  //   steering_angle = HunterMotionCmd::max_steering_angle;
 
   std::lock_guard<std::mutex> guard(motion_cmd_mutex_);
   current_motion_cmd_.linear_velocity_height_byte = static_cast<int16_t>(linear_vel*1000)>>8;
   current_motion_cmd_.linear_velocity_low_byte = static_cast<int16_t>(linear_vel*1000)&0xff;
-  current_motion_cmd_.angular_velocity_height_byte = static_cast<int16_t>(angular_vel*1000)>>8;
-  current_motion_cmd_.angular_velocity_low_byte = static_cast<int16_t>(angular_vel*1000)&0xff;
+  current_motion_cmd_.angular_velocity_height_byte = static_cast<int16_t>(steering_angle*1000)>>8;
+  current_motion_cmd_.angular_velocity_low_byte = static_cast<int16_t>(steering_angle*1000)&0xff;
   current_motion_cmd_.fault_clear_flag = fault_clr_flag;
 
   FeedCmdTimeoutWatchdog();
